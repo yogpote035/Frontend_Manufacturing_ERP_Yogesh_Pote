@@ -11,6 +11,8 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import MainLayout from "./components/modules/sales/components/MainLayout/MainLayout";
 import NotFound from "./components/common/NotFound";
 import NewLead from "./pages/sales/NewLead";
+import { SalesReport } from "./components/modules/sales/components/SalesReport";
+import SalesEmployees from "./components/modules/sales/components/SalesEmployees";
 
 // const Layout = () => {
 //   return (
@@ -27,6 +29,7 @@ function App() {
       path: "/",
       element: <LoginPage />,
     },
+
     // Sales Module Routes
     {
       path: "/sales",
@@ -42,7 +45,7 @@ function App() {
               </Suspense>,
             },
             {
-              path: "home",
+              path: "dashboard",
               element: <Suspense fallback={<div>Loading...</div>}>
                 <SalesDashboard />
               </Suspense>,
@@ -50,6 +53,12 @@ function App() {
             {
               path: "new-lead",
               element: <NewLead />,
+            },{
+              path: "reports",
+              element: <SalesReport />,
+            },{
+              path: "employees",
+              element: <SalesEmployees />,
             },
           ],
         },

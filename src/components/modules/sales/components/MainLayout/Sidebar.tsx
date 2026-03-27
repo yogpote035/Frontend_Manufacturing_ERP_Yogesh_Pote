@@ -1,57 +1,72 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  UserSquare2,
+  BarChart3,
+  Percent,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-interface SidebarProps {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+const Sidebar = ({ isOpen }: { isOpen: boolean }) => {
+  const navigate = useNavigate();
   const location = useLocation();
 
   const menuItems = [
-    { name: "Dashboard", path: "/sales/home" },
-    { name: "Leads", path: "/sales/new-lead" },
-    { name: "Reports", path: "/sales/reports" },
+    {
+      name: "Dashboard",
+      icon: <LayoutDashboard size={20} />,
+      path: "/sales/dashboard",
+    },
+    {
+      name: "Lead",
+      icon: <Users size={20} />,
+      path: "/sales/new-lead",
+    },
+    {
+      name: "Employees",
+      icon: <UserSquare2 size={20} />,
+      path: "/sales/employees",
+    },
+    {
+      name: "Reports & Analytics",
+      icon: <BarChart3 size={20} />,
+      path: "/sales/reports",
+    },
   ];
 
   return (
-    <>
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black opacity-30 z-20 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      <div
-        className={`fixed md:static z-30 top-0 left-0 h-full w-64 bg-white shadow-md transform 
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        md:translate-x-0 transition-transform duration-300`}
-      >
-        <div className="p-4 text-xl font-bold border-b">
-          ERP Panel
+    <div className="w-64 bg-white h-full border-r border-gray-200 flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+        <div className="bg-black p-2 rounded-lg text-white">
+          <Percent size={20} />
         </div>
+        <span className="font-bold text-xl text-gray-800">Sales</span>
+      </div>
 
-        <nav className="mt-4">
-          {menuItems.map((item) => (
-            <Link
+      {/* Menu */}
+      <nav className="flex-1 px-4 py-6 space-y-2">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+
+          return (
+            <button
               key={item.name}
-              to={item.path}
-              onClick={() => setIsOpen(false)}
-              className={`block px-4 py-3 mx-2 rounded-lg transition ${
-                location.pathname === item.path
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-700 hover:bg-gray-200"
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                isActive
+                  ? "bg-black text-white shadow-lg"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
-    </>
+              {item.icon}
+              <span className="font-medium">{item.name}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
   );
 };
 

@@ -4,18 +4,20 @@ import Navbar from "./Navbar";
 import { Outlet } from "react-router-dom";
 
 const MainLayout: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+    <div className="flex h-screen bg-[#F3F4F6] overflow-hidden">
+      {/* Sidebar - Fixed Width */}
+      <Sidebar isOpen={isSidebarOpen} />
 
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 w-full">
-        <Navbar setIsSidebarOpen={setIsSidebarOpen} />
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Navbar - Fixed at top of this column */}
+        <Navbar />
 
-        <main className="p-4 overflow-y-auto">
+        {/* Scrollable Content */}
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>
