@@ -1,4 +1,3 @@
-import React from "react";
 import {
   LayoutDashboard,
   Users,
@@ -8,7 +7,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = ({ isOpen }: { isOpen: boolean }) => {
+const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 

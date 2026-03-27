@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { Outlet } from "react-router-dom";
 
 const MainLayout: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   return (
     <div className="flex h-screen bg-[#F3F4F6] overflow-hidden">
       {/* Sidebar - Fixed Width */}
-      <Sidebar isOpen={isSidebarOpen} />
+      <Sidebar />
 
       {/* Main Content Area */}
       <div className="flex flex-col flex-1 overflow-hidden">
