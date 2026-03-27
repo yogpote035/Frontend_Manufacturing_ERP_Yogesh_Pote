@@ -3,8 +3,10 @@
   RouterProvider,
   // Outlet
 } from "react-router-dom";
-import { SalesDashboard } from "./pages/sales/SalesDashboard";
-import { LoginPage } from "./pages/LoginPage";
+import { lazy, Suspense } from "react";
+
+const SalesDashboard = lazy(() => import("./pages/sales/SalesDashboard"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import MainLayout from "./components/modules/sales/components/MainLayout/MainLayout";
 import NotFound from "./components/common/NotFound";
@@ -35,11 +37,15 @@ function App() {
           children: [
             {
               index: true, // default route → /sales
-              element: <SalesDashboard />,
+              element: <Suspense fallback={<div>Loading...</div>}>
+                <SalesDashboard />
+              </Suspense>,
             },
             {
               path: "home",
-              element: <SalesDashboard />,
+              element: <Suspense fallback={<div>Loading...</div>}>
+                <SalesDashboard />
+              </Suspense>,
             },
             {
               path: "new-lead",

@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Login } from '../components/auth/Login';
 
-export const LoginPage: React.FC = () => {
+const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLoginSuccess = (user: any) => {
@@ -30,3 +30,5 @@ export const LoginPage: React.FC = () => {
   
   return <Login onLoginSuccess={handleLoginSuccess}/>;
 };
+
+export default LoginPage;

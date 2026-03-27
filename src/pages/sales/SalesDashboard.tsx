@@ -1,8 +1,9 @@
-﻿import React from 'react';
-import Dashboard from '../../components/modules/sales/Dashboard';
+﻿import Dashboard from '../../components/modules/sales/Dashboard';
 
-export const SalesDashboard: React.FC = () => {
+ const SalesDashboard = () => {
   return (
     <Dashboard />
   );
 };
+
+export default SalesDashboard;
