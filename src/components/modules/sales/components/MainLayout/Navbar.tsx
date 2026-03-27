@@ -21,7 +21,7 @@ const Navbar = () => {
       <div className="flex items-center gap-6">
         {/* Notification */}
         <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-          <img src="/icons/Bell.svg" className="h-6 w-6" alt="" />
+          <img src="/icons/Bell.svg" className="h-5 w-5" alt="" />
         </button>
 
         {/* User Profile */}
@@ -30,14 +30,14 @@ const Navbar = () => {
             <p className="text-sm font-bold text-gray-900 leading-none">Rahul Jagtap</p>
             <p className="text-xs text-gray-500 mt-1">Sales Manager</p>
           </div>
-          <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm tracking-tighter">
+          <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm tracking-tighter">
             SM
           </div>
         </div>
         <button
           onClick={onLogout}
           className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-          <img src="/icons/logout.svg" className="h-6 w-6" alt="" />
+          <img src="/icons/logout.svg" className="h-5 w-5" alt="" />
         </button>
       </div>
     </header>
