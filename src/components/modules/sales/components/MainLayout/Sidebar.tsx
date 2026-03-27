@@ -1,4 +1,3 @@
-import { Percent } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
@@ -14,7 +13,7 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-6 border-b border-gray-100 flex items-center gap-3">
         <div className="bg-black p-2 rounded-lg text-white">
-          <Percent size={20} />
+          <img src="/icons/salesDashboardLogo.svg" className="h-8 w-8" alt="" />
         </div>
         <span className="font-bold text-xl text-gray-800">Sales</span>
       </div>
