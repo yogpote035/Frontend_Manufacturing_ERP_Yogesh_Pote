@@ -42,19 +42,19 @@ const COLORS = ["#005d52", "#4fb29b", "#f08552", "#b0d9d9", "#d1e9e7", "#cbd5e1"
 // ---------------- DATA ----------------
 const DATA: Record<string, DataPoint> = {
   Weekly: {
-    range: "17 - 23 March 2024",
+    range: "17 - 23 March 2026",
     stats: { leads: 156, won: 42, revenue: "2.4M", rate: "18%" },
     pipeline: [{ name: "New Lead", value: 32 }, { name: "Contacted", value: 24 }, { name: "Converted", value: 18 }, { name: "Quotation", value: 12 }, { name: "Won", value: 8 }, { name: "Lost", value: 3 }],
     products: [{ name: "Fridge", sold: 90, target: 75 }, { name: "AC", sold: 90, target: 65 }, { name: "Wash", sold: 90, target: 40 }, { name: "Micro", sold: 90, target: 45 }, { name: "Heat", sold: 70, target: 90 }],
   },
   Monthly: {
-    range: "March 2024",
+    range: "March 2026",
     stats: { leads: 640, won: 185, revenue: "10.2M", rate: "24%" },
     pipeline: [{ name: "New Lead", value: 140 }, { name: "Contacted", value: 110 }, { name: "Converted", value: 90 }, { name: "Quotation", value: 65 }, { name: "Won", value: 45 }, { name: "Lost", value: 18 }],
     products: [{ name: "Fridge", sold: 320, target: 300 }, { name: "AC", sold: 450, target: 400 }, { name: "Wash", sold: 210, target: 250 }, { name: "Micro", sold: 180, target: 150 }, { name: "Heat", sold: 150, target: 200 }],
   },
   Quarterly: {
-    range: "Q1 2024",
+    range: "Q1 2026",
     stats: { leads: "1.8K", won: 520, revenue: "34.5M", rate: "28%" },
     pipeline: [{ name: "New Lead", value: 450 }, { name: "Contacted", value: 380 }, { name: "Converted", value: 290 }, { name: "Quotation", value: 210 }, { name: "Won", value: 155 }, { name: "Lost", value: 60 }],
     products: [{ name: "Fridge", sold: 980, target: 900 }, { name: "AC", sold: 1200, target: 1100 }, { name: "Wash", sold: 750, target: 800 }, { name: "Micro", sold: 600, target: 550 }, { name: "Heat", sold: 500, target: 600 }],
