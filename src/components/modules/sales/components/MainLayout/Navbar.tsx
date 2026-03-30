@@ -1,51 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import CustomCalendar from "../../../../common/CustomeCalender";
 
 
 const Navbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
-  const navigate = useNavigate();
-
-  const onLogout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
-
-  // Calendar State
-  const [openCal, setOpenCal] = useState(false);
-  const calRef = useRef<HTMLDivElement>(null);
-  // Note State
-  const [openNote, setOpenNote] = useState(false);
-  const [note, setNote] = useState("");
-  const noteRef = useRef<HTMLDivElement>(null);
-
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (calRef.current && !calRef.current.contains(e.target as Node)) {
-        setOpenCal(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenCal(false);
-    };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [])
 
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
-        !calRef.current?.contains(e.target as Node) &&
+        !noteRef.current?.contains(e.target as Node) &&
         !noteRef.current?.contains(e.target as Node)
       ) {
-        setOpenCal(false);
+        setOpenNote(false);
         setOpenNote(false);
       }
     };
@@ -54,11 +20,19 @@ const Navbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Note State
+  const [openNote, setOpenNote] = useState(false);
+  const [note, setNote] = useState("");
+  const noteRef = useRef<HTMLDivElement>(null);
 
-
-
-
-
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape")
+        setOpenNote(false);
+    };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [])
 
 
   const handleSaveNote = () => {
@@ -109,7 +83,8 @@ const Navbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
             {/* Button */}
             <button
               onClick={() => setOpenNote((prev) => !prev)}
-              className="p-2.5 text-gray-500 hover:bg-white rounded-full transition-all hover:text-[#005d52] active:scale-90"
+              title="Add Note"
+              className="p-2.5 text-gray-500 outline-none hover:bg-white rounded-full transition-all hover:text-[#005d52] active:scale-90"
             >
               <img src="/icons/note.svg" className="h-5 w-5 opacity-70" alt="" />
             </button>
@@ -153,67 +128,34 @@ const Navbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
                     >
                       Save
                     </button>
+                    <Link to="/sales/notes" className="px-3 py-1.5 text-xs bg-[#005d52] text-white rounded-lg hover:bg-[#004940]">
+                      View All
+                    </Link>
                   </div>
 
                 </div>
               </div>
             )}
           </div>
-
-          {/* Calendar with Popup */}
-          <div className="relative" ref={calRef}>
-
-            {/* Button */}
-            <button
-              onClick={() => setOpenCal((prev) => !prev)}
-              className="p-2.5 text-gray-500 hover:bg-white rounded-full transition-all hover:text-[#005d52] active:scale-90 outline-none"
-            >
-              <img src="/icons/calendar.svg" className="h-5 w-5 opacity-70" alt="" />
-            </button>
-
-            {/* Popup */}
-            {openCal && (
-              <div className="absolute -right-25 mt-3 z-50">
-                {/* Calendar Box */}
-                <div className=" rounded-2xl p-2 animate-[fadeIn_0.2s_ease]">
-                  <CustomCalendar />
-                </div>
-
-              </div>
-            )}
-          </div>
         </div>
-
         {/* Notification */}
-        <button className="relative p-2.5 text-gray-500 hover:bg-white rounded-full transition-colors active:scale-90">
+        <button className="relative p-2.5 text-gray-500 hover:bg-white rounded-full transition-colors active:scale-90 outline-none">
           <img src="/icons/Bell.svg" className="h-5 w-5 sm:h-6 sm:w-6 opacity-70" alt="" />
           <span className="absolute top-2 right-2 h-3 w-3 sm:h-3.5 sm:w-3.5 bg-[#e63946] text-[8px] sm:text-[9px] text-white rounded-full flex items-center justify-center border-2 border-[#f4f7f6] font-bold">
             3
           </span>
         </button>
-
         <div className="hidden sm:block h-8 w-px bg-gray-200 mx-1"></div>
-
         {/* Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white border-2 border-white shadow-sm rounded-full flex items-center justify-center text-xs sm:text-sm font-bold text-[#005d52]">
             SM
           </div>
-
           <div className="hidden lg:block text-left">
             <p className="text-xs font-bold text-gray-800">Rahul Jagtap</p>
             <p className="text-[10px] text-gray-400 uppercase">Sales Manager</p>
           </div>
         </div>
-
-        {/* Logout */}
-        <button
-          onClick={onLogout}
-          className="p-2.5 text-gray-400 hover:bg-white rounded-full hover:text-red-500 transition-all active:scale-90"
-        >
-          <img src="/icons/logout.svg" className="h-5 w-5 opacity-60" alt="" />
-        </button>
-
       </div>
     </header>
   );

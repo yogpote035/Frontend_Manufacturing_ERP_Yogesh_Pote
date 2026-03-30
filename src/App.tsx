@@ -18,6 +18,7 @@ import RoleNotMatched from "./components/common/RoleNotMatched";
 import LeadsPage from "./pages/sales/LeadsPage";
 import LeadForm from "./components/modules/sales/components/LeadForm";
 import LeadView from "./components/modules/sales/components/LeadView";
+import NotesPage from "./components/common/NotePage";
 
 /* Global Suspense Wrapper */
 const withSuspense = (Component: React.ReactNode) => (
@@ -81,6 +82,10 @@ function App() {
             {
               path: "lead-view/:id",
               element: <LeadView />,
+            },
+            {
+              path: "notes",
+              element: <NotesPage />,
             },
           ],
         },
