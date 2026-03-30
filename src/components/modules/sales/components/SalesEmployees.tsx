@@ -3,11 +3,9 @@ import type { ChangeEvent } from "react";
 import { 
   UserPlus, 
   Search, 
-  ChevronDown, 
-  MoreHorizontal, 
+    MoreHorizontal, 
   Mail, 
   Phone,
-  Filter,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -101,9 +99,9 @@ const SalesEmployees: React.FC = () => {
               className="w-full pl-11 pr-4 py-2.5 bg-white border-none rounded-full text-sm outline-none shadow-sm focus:ring-2 focus:ring-[#005d52]/20 transition-all placeholder:text-gray-300"
             />
           </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-100 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-50 shadow-sm transition-colors">
+          {/* <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-100 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-50 shadow-sm transition-colors">
             <Filter size={14} className="opacity-50" /> Filter <ChevronDown size={14} className="opacity-50" />
-          </button>
+          </button> */}
         </div>
       </div>
 

@@ -64,7 +64,7 @@ export const Login: React.FC = () => {
     localStorage.setItem('userRole', user.role);
     const moduleRoutes: Record<string, string> = {
       admin: '/admin',
-      sales: '/sales',
+      sales: '/sales/dashboard',
       purchase: '/purchase',
       inventory: '/inventory',
       production: '/production',
