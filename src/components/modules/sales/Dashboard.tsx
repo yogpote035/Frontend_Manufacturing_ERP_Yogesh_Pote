@@ -73,7 +73,7 @@ const StatCard = ({ title, value, svg }: StatCardProps) => (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{title}</p>
-        <div className="p-2 rounded-lg bg-[#f4f7f6]">
+        <div className="p-2 rounded-lg bg-[#d1e9e7]">
           <img src={svg} alt="" className="w-6 h-6 opacity-40" />
         </div>
       </div>
