@@ -189,7 +189,7 @@ const OpportunityList: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#f4f7f6] p-4 sm:p-6 lg:p-8 font-sans text-gray-900">
-            <div className="max-w-400 mx-auto">
+            <div className="max-w-5xl mx-auto">
                 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -197,6 +197,12 @@ const OpportunityList: React.FC = () => {
                         <h1 className="text-2xl font-bold text-gray-800">Opportunities</h1>
                         <p className="text-sm text-gray-400 mt-1">Track and manage prospective deals</p>
                     </div>
+                    <button
+                        onClick={() => navigate("/sales/opportunities")}
+                        className="flex items-center gap-2 bg-[#005d52] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-teal-900/20"
+                    >
+                        <Plus size={18} strokeWidth={3} /> New Opportunity
+                    </button>
                 </div>
 
                 {/* KPI/Time Tabs Row */}
@@ -340,15 +346,15 @@ const OpportunityList: React.FC = () => {
 
                     {/* Table */}
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-500">
+                        <table className="w-full text-left border-collapse min-w-200">
                             <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                                <tr className="bg-gray-50/50 border-b border-gray-100 text-[11px] font-bold text-gray-800 uppercase tracking-widest">
                                     <th className="p-5 w-12 sticky left-0 bg-gray-50/50 z-10">
                                         <input type="checkbox" className="accent-[#005d52]" checked={selectedIds.length === paginatedOpportunities.length && paginatedOpportunities.length > 0} onChange={toggleSelectAll} />
                                     </th>
                                     {[
-                                        "Opp ID", "Date Created", "Company name", "Contact person", "Number", "Email ID",
-                                        "Est. value", "Source", "Stage", "Priority", "Assigned", "Exp. Close Date", "Actions"
+                                        "Opp ID", "Date Created", "Company name", "Est. value", 
+                                        "Priority", "Exp. Close Date", "Actions"
                                     ].map((col) => (
                                         <th key={col} className="p-5 border-l border-gray-100 whitespace-nowrap">
                                             <div className="flex items-center gap-2 cursor-pointer hover:text-gray-800">
@@ -362,34 +368,24 @@ const OpportunityList: React.FC = () => {
                                 {paginatedOpportunities.map((opp) => (
                                     <tr key={opp.id} className="hover:bg-gray-50/40 transition-colors">
                                         <td className="p-5 sticky left-0 bg-white z-10"><input type="checkbox" className="accent-[#005d52]" checked={selectedIds.includes(opp.id)} onChange={() => toggleSelectOne(opp.id)} /></td>
-                                        <td className="p-5 text-sm font-bold text-[#005d52]">{opp.id}</td>
-                                        <td className="p-5 text-sm text-gray-400 italic">{opp.createdAt}</td>
-                                        <td className="p-5 text-sm font-medium text-gray-700">{opp.company}</td>
-                                        <td className="p-5 text-sm text-gray-500">{opp.contact}</td>
-                                        <td className="p-5 text-sm text-gray-500">{opp.number}</td>
-                                        <td className="p-5 text-sm text-gray-500 underline decoration-gray-200">{opp.email}</td>
-                                        <td className="p-5 text-sm text-gray-800 font-extrabold">{opp.expectedValue}</td>
-                                        <td className="p-5 text-sm text-gray-500">{opp.source}</td>
-                                        <td className="p-5">
-                                            <span className="px-3 py-1 rounded-lg border border-gray-300 text-[10px] font-bold text-gray-600 whitespace-nowrap">
-                                                {opp.stage}
-                                            </span>
-                                        </td>
-                                        <td className="p-5 text-sm text-gray-700 font-medium whitespace-nowrap">{opp.priority}</td>
-                                        <td className="p-5 text-sm text-gray-500 whitespace-nowrap">{opp.assignedTo}</td>
-                                        <td className="p-5 text-sm text-gray-400 whitespace-nowrap">{opp.expectedCloseDate}</td>
+                                        <td className="p-5 text-sm ">{opp.id}</td>
+                                        <td className="p-5 text-sm text-gray-800">{opp.createdAt}</td>
+                                        <td className="p-5 text-sm  text-gray-800">{opp.company}</td>
+                                        <td className="p-5 text-sm text-gray-800">{opp.expectedValue}</td>
+                                        <td className="p-5 text-sm text-gray-700">{opp.priority}</td>
+                                        <td className="p-5 text-sm text-gray-800 ">{opp.expectedCloseDate}</td>
                                         <td className="p-5">
                                             <div className="flex gap-2">
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-400 transition-colors"><Eye size={16}/></button>
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-400 transition-colors"><FileEdit size={16}/></button>
-                                                <button className="p-1.5 hover:bg-red-50 rounded-md text-gray-400 hover:text-red-500 transition-colors" onClick={() => {setOpportunities(prev => prev.filter(o => o.id !== opp.id))}}><Trash2 size={16}/></button>
+                                                <button onClick={() => navigate(`/sales/opportunity-view/${opp.id}`)} className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600 "><Eye size={18}/></button>
+                                                <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600"><FileEdit size={16}/></button>
+                                                <button className="p-1.5 hover:bg-red-50 rounded-md text-gray-600 hover:text-red-500 " onClick={() => {setOpportunities(prev => prev.filter(o => o.id !== opp.id))}}><Trash2 size={16}/></button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
                                 {paginatedOpportunities.length === 0 && (
                                     <tr>
-                                        <td colSpan={14} className="p-20 text-center text-gray-400 italic">No opportunities match your criteria.</td>
+                                        <td colSpan={8} className="p-20 text-center text-gray-400 italic">No opportunities match your criteria.</td>
                                     </tr>
                                 )}
                             </tbody>

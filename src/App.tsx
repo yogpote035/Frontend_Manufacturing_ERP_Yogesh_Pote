@@ -17,6 +17,8 @@ import SalesEmployees from "./components/modules/sales/components/SalesEmployees
 import RoleNotMatched from "./components/common/RoleNotMatched";
 import LeadsPage from "./pages/sales/LeadsPage";
 import OpportunitiesPage from "./pages/sales/OpportunitiesPage";
+import QuotationPage from "./pages/sales/QuotationPage";
+import OpportunityView from "./components/modules/sales/components/OpportunityView";
 import LeadForm from "./components/modules/sales/components/LeadForm";
 import LeadView from "./components/modules/sales/components/LeadView";
 import NotesPage from "./components/common/NotePage";
@@ -69,6 +71,10 @@ function App() {
               path: "opportunities",
               element: <OpportunitiesPage />,
             },
+            {
+              path: "quotation",
+              element: <QuotationPage />,
+            },
 
             {
               path: "new-lead",
@@ -87,6 +93,10 @@ function App() {
             {
               path: "lead-view/:id",
               element: <LeadView />,
+            },
+            {
+              path: "opportunity-view/:id",
+              element: <OpportunityView />,
             },
             {
               path: "notes",
