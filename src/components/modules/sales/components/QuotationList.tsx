@@ -261,7 +261,7 @@ const QuotationList: React.FC = () => {
                                         <td className="p-5 text-sm text-gray-700 whitespace-nowrap">{qt.createdBy}</td>
                                         <td className="p-5">
                                             <div className="flex gap-2">
-                                                <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600 transition-colors"><Eye size={18}/></button>
+                                                <button onClick={() => navigate(`/sales/quotation-view/${qt.id}`)} className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600 transition-colors"><Eye size={18}/></button>
                                                 <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600 transition-colors"><Download size={16}/></button>
                                                 <button className="p-1.5 hover:bg-red-50 rounded-md text-gray-600 hover:text-red-500 transition-colors" onClick={() => {setQuotations(prev => prev.filter(q => q.id !== qt.id))}}><Trash2 size={16}/></button>
                                             </div>

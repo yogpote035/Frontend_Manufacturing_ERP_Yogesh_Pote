@@ -18,6 +18,7 @@ import RoleNotMatched from "./components/common/RoleNotMatched";
 import LeadsPage from "./pages/sales/LeadsPage";
 import OpportunitiesPage from "./pages/sales/OpportunitiesPage";
 import QuotationPage from "./pages/sales/QuotationPage";
+import QuotationView from "./components/modules/sales/components/QuotationView";
 import OpportunityView from "./components/modules/sales/components/OpportunityView";
 import LeadForm from "./components/modules/sales/components/LeadForm";
 import LeadView from "./components/modules/sales/components/LeadView";
@@ -74,6 +75,10 @@ function App() {
             {
               path: "quotation",
               element: <QuotationPage />,
+            },
+            {
+              path: "quotation-view/:id",
+              element: <QuotationView />,
             },
 
             {
