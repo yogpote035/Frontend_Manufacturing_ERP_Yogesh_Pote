@@ -1,4 +1,4 @@
-export type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time";
+export type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time" |"Custom Range";
 
 export type DateRange = {
   from: string;

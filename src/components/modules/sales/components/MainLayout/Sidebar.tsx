@@ -113,8 +113,9 @@ const Sidebar: React.FC = () => {
         <button
           onClick={() => navigate("/sales/orders")}
           className={`w-full flex items-center gap-3 px-4 hover:cursor-pointer py-3 rounded-xl transition-all duration-200 ${isActive("/sales/orders")
-              ? "bg-[#005d52] text-white shadow-md"
-              : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+
+            ? "bg-[#005d52] text-white shadow-md"
+            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
             }`}
         >
           <img
