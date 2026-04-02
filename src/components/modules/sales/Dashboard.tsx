@@ -1,4 +1,4 @@
-﻿import  { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -118,7 +118,7 @@ export const Dashboard = () => {
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
-
+  const isMobile = window.innerWidth < 640;
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
@@ -232,14 +232,40 @@ export const Dashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={currentData.pipeline} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10, fontWeight: 500 }} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={ isMobile?false:{ fill: '#7e899c', fontSize: 10, fontWeight: 500 }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10 }} />
                   <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={35}>
-                    {currentData.pipeline.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
+                  <Bar
+  dataKey="value"
+  radius={[8, 8, 0, 0]}
+  barSize={isMobile ? 28 : 35}
+  label={
+    isMobile
+      ? (props: any) => {
+          const { x, y, width, height, index } = props;
+          const label = currentData.pipeline[index]?.name;
+
+          return (
+            <text
+              x={x + width / 2}
+              y={y + height / 2}
+              fill="#ffffff"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize={10}
+              transform={`rotate(-90, ${x + width / 2}, ${y + height / 2})`}
+            >
+              {label}
+            </text>
+          );
+        }
+      : false
+  }
+>
+  {currentData.pipeline.map((_, index) => (
+    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+  ))}
+</Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
