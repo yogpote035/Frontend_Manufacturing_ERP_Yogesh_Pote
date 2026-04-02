@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
-    Plus,
     ChevronDown,
     Search,
     Trash2,
@@ -41,7 +40,6 @@ type Opportunity = {
 };
 
 const INITIAL_OPPORTUNITIES: Opportunity[] = [
-    // ... (Your existing mock data remains the same)
     { id: "OP001", company: "Rajesh Electronics", contact: "Rakesh Patil", number: "9869226825", email: "rajeshelectronics@gmail.com", expectedValue: "₹ 25.5L", source: "Dealer", stage: "Proposal", priority: "High", assignedTo: "Rahul Patil", expectedCloseDate: "2026-03-31", createdAt: "2026-03-18" },
     { id: "OP002", company: "Modern Appliances", contact: "Rohit Sharma", number: "9822334455", email: "modern@appl.com", expectedValue: "₹ 5.5L", source: "Website", stage: "Negotiation", priority: "Medium", assignedTo: "Sneha P.", expectedCloseDate: "2026-04-15", createdAt: "2026-03-10" },
     { id: "OP003", company: "Kitchen Hub", contact: "Anjali M.", number: "9123456789", email: "hub@kitchen.com", expectedValue: "₹ 11.2L", source: "Referral", stage: "Discovery", priority: "Low", assignedTo: "Rahul Patil", expectedCloseDate: "2026-05-10", createdAt: "2026-02-15" },
@@ -116,12 +114,6 @@ const OpportunityList: React.FC = () => {
                         <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Opportunities</h1>
                         <p className="text-sm text-gray-400 font-normal">Track and manage prospective deals</p>
                     </div>
-                    <button
-                        onClick={() => navigate("/sales/new-opportunity")}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg shadow-teal-900/20 hover:scale-105 transition-transform"
-                    >
-                        <Plus size={18} strokeWidth={3} /> New Opportunity
-                    </button>
                 </header>
 
                 {/* Tabs Row with Custom Range Popup */}
@@ -134,13 +126,13 @@ const OpportunityList: React.FC = () => {
                                 className={`px-5 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                             >
                                 {tab}
-                            </button>
+                            </button> 
                         ))}
                         <button
                             onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                             className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                         >
-                            <CalendarIcon size={14} /> Custom Range
+                            <CalendarIcon size={14} /> Custom 
                         </button>
                     </div>
 
@@ -198,7 +190,7 @@ const OpportunityList: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap items-center justify-end gap-3 w-full">
-                            {/* Filter Dropdowns logic (Similar to Lead List) */}
+                            {/* Filter Dropdowns */}
                             {[
                                 { label: 'Source', value: sourceFilter, options: ["All", "Dealer", "Website", "Referral", "Trade Show", "Cold Call"], setter: setSourceFilter },
                                 { label: 'Priority', value: priorityFilter, options: ["All", "High", "Medium", "Low"], setter: setPriorityFilter },
@@ -236,44 +228,74 @@ const OpportunityList: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Table Area */}
+                    {/* Table Area with Vertical Lines */}
                     <div className="w-full overflow-x-auto">
-                        <table className="w-full text-left border-separate border-spacing-0">
+                        <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/50">
-                                    <th className="w-12 p-4 text-center border-b border-gray-100">
+                                    <th className="w-12 p-4 text-center border-b border-gray-100 border-r border-gray-100">
                                         <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.length === paginatedOpportunities.length && paginatedOpportunities.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    {["Opp ID", "Date Created", "Company Name", "Est. Value", "Priority", "Exp. Close Date", "Actions"].map((col) => (
-                                        <th key={col} className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100">
-                                            <div className="flex items-center gap-1">
-                                                {col} <ChevronsUpDown size={12} className="text-gray-300" />
-                                            </div>
-                                        </th>
-                                    ))}
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r border-gray-100">
+                                        Opp ID
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r border-gray-100">
+                                        Date Created
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r border-gray-100">
+                                        Company Name
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r border-gray-100">
+                                        Est. Value
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r border-gray-100">
+                                        Priority
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r border-gray-100">
+                                        Exp. Close Date
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center">
+                                        Actions
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                                 {paginatedOpportunities.map((opp) => (
                                     <tr key={opp.id} className="hover:bg-[#f8faf9]/80 transition-colors">
-                                        <td className="p-4 text-center">
+                                        <td className="p-4 text-center border-r border-gray-100">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.includes(opp.id)} onChange={() => setSelectedIds(prev => prev.includes(opp.id) ? prev.filter(i => i !== opp.id) : [...prev, opp.id])} />
                                         </td>
-                                        <td className="p-4 text-xs font-bold text-[#005d52]">{opp.id}</td>
-                                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{opp.createdAt}</td>
-                                        <td className="p-4 text-xs text-gray-800 font-medium">{opp.company}</td>
-                                        <td className="p-4 text-xs text-gray-800">{opp.expectedValue}</td>
-                                        <td className="p-4">
+                                        <td className="p-4 text-xs font-bold text-[#005d52] border-r border-gray-100">
+                                            {opp.id}
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap border-r border-gray-100">
+                                            {opp.createdAt}
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                            {opp.company}
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                            {opp.expectedValue}
+                                        </td>
+                                        <td className="p-4 border-r border-gray-100">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${opp.priority === 'High' ? 'bg-red-50 text-red-600' : opp.priority === 'Medium' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
                                                 {opp.priority}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-xs text-gray-600">{opp.expectedCloseDate}</td>
+                                        <td className="p-4 text-xs text-gray-600 border-r border-gray-100">
+                                            {opp.expectedCloseDate}
+                                        </td>
                                         <td className="p-4">
-                                            <div className="flex gap-1 justify-end">
-                                                <button className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all"><Eye size={15}/></button>
-                                                <button className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all"><FileEdit size={15}/></button>
-                                                <button className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setOpportunities(prev => prev.filter(o => o.id !== opp.id))}><Trash2 size={15}/></button>
+                                            <div className="flex gap-1 justify-center">
+                                                <button className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all" onClick={() => navigate(`/sales/opportunity-view/${opp.id}`)}>
+                                                    <Eye size={15}/>
+                                                </button>
+                                                <button className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all" onClick={() => navigate(`/sales/opportunity-edit/${opp.id}`)}>
+                                                    <FileEdit size={15}/>
+                                                </button>
+                                                <button className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setOpportunities(prev => prev.filter(o => o.id !== opp.id))}>
+                                                    <Trash2 size={15}/>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -288,13 +310,19 @@ const OpportunityList: React.FC = () => {
                             Showing <span className="text-gray-900">{paginatedOpportunities.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredOpportunities.length)}</span> of <span className="text-gray-900">{filteredOpportunities.length}</span> Results
                         </div>
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors"><ChevronLeft size={20} /></button>
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors">
+                                <ChevronLeft size={20} />
+                            </button>
                             <div className="flex gap-2">
                                 {[...Array(totalPages)].map((_, i) => (
-                                    <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${currentPage === i + 1 ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20" : "text-gray-400 hover:bg-gray-100"}`}>{i + 1}</button>
+                                    <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${currentPage === i + 1 ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20" : "text-gray-400 hover:bg-gray-100"}`}>
+                                        {i + 1}
+                                    </button>
                                 ))}
                             </div>
-                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors"><ChevronRight size={20} /></button>
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors">
+                                <ChevronRight size={20} />
+                            </button>
                         </div>
                     </footer>
                 </div>

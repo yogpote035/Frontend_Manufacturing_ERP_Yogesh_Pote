@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronRight, Calendar, Building2, MapPin, Edit3, Download, IndianRupee, User } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-// @ts-ignore
 import html2pdf from 'html2pdf.js';
 
 const OpportunityView: React.FC = () => {
@@ -13,17 +12,33 @@ const OpportunityView: React.FC = () => {
     const [expectedCloseDate, setExpectedCloseDate] = useState("2026-03-31");
     const [assignedTo, setAssignedTo] = useState("Rahul Patil");
 
-    const handleExport = () => {
+    const handleExport = async () => {
         const element = document.getElementById('opportunity-pdf-content');
         if (element) {
             const opt = {
-                margin:       0.2,
-                filename:     `Opportunity_${id || 'OP001'}.pdf`,
-                image:        { type: 'jpeg' as const, quality: 0.98 },
-                html2canvas:  { scale: 1 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' as const }
+                margin: [0.2, 0.2, 0.2, 0.2] as [number, number, number, number],
+                filename: `Opportunity_${id || 'OP001'}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { 
+                    type: 'jpeg' as const, 
+                    quality: 0.98 
+                },
+                html2canvas: { 
+                    scale: 2,
+                    letterRendering: true,
+                    useCORS: true
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'portrait' as const
+                }
             };
-            html2pdf().set(opt).from(element).save();
+            
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } catch (error) {
+                console.error('PDF generation error:', error);
+            }
         }
     };
 

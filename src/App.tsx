@@ -26,6 +26,9 @@ import OpportunityView from "./components/modules/sales/components/OpportunityVi
 import LeadForm from "./components/modules/sales/components/LeadForm";
 import LeadView from "./components/modules/sales/components/LeadView";
 import NotesPage from "./components/common/NotePage";
+import OpportunityEdit from "./components/modules/sales/components/OpportunityEdit";
+import QuotationCreate from "./components/modules/sales/components/QuotationCreate";
+import ProductionEdit from "./components/modules/sales/components/ProductionEdit";
 
 /* Global Suspense Wrapper */
 const withSuspense = (Component: React.ReactNode) => (
@@ -75,13 +78,26 @@ function App() {
               path: "opportunities",
               element: <OpportunitiesPage />,
             },
+                        {
+              path: "opportunity-view/:id",
+              element: <OpportunityView />,
+            },
+            {
+              path: "opportunity-edit/:id",
+              element: <OpportunityEdit/>
+            },
             {
               path: "quotation",
               element: <QuotationPage />,
             },
+
             {
               path: "quotation-view/:id",
               element: <QuotationView />,
+            },
+            {
+              path:"quotation-create",
+              element:<QuotationCreate/>
             },
             {
               path: "orders",
@@ -94,6 +110,10 @@ function App() {
             {
               path: "production",
               element: <SalesProductionPage />,
+            },
+            {
+              path:"production-edit/:id",
+              element:<ProductionEdit/>
             },
 
             {
@@ -113,10 +133,6 @@ function App() {
             {
               path: "lead-view/:id",
               element: <LeadView />,
-            },
-            {
-              path: "opportunity-view/:id",
-              element: <OpportunityView />,
             },
             {
               path: "notes",

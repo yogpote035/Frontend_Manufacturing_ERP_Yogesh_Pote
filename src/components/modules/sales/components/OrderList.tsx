@@ -11,7 +11,7 @@ import {
     type TimeTab as BaseDateTab,
 } from "../utils/dateFilters";
 
-type TimeTab = BaseDateTab | "Custom";
+type TimeTabWithCustom = TimeTab | "Custom";
 
 type Status = "Pending" | "Processing" | "Delivered" | "Cancelled" | "All";
 
@@ -40,7 +40,7 @@ const OrderList: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [activeTab, setActiveTab] = useState<TimeTab>("All Time");
+    const [activeTab, setActiveTab] = useState<TimeTabWithCustom>("All Time");
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [customDateRange, setCustomDateRange] = useState<DateRange>({
         from: "",
@@ -130,7 +130,7 @@ const OrderList: React.FC = () => {
                             onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                             className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                         >
-                            <CalendarIcon size={14} /> Custom Range
+                            <CalendarIcon size={14} /> Custom 
                         </button>
                     </div>
 
@@ -217,43 +217,68 @@ const OrderList: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Table */}
+                    {/* Table with Vertical Lines */}
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-separate border-spacing-0">
+                        <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/50">
-                                    <th className="w-12 p-4 text-center border-b border-gray-100">
+                                    <th className="w-12 p-4 text-center border-b border-gray-100 border-r border-gray-100">
                                         <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.length === paginatedOrders.length && paginatedOrders.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    {["Order ID", "Order Date", "Customer", "Total Amount", "Status", "Actions"].map((col) => (
-                                        <th key={col} className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100">
-                                            <div className="flex items-center gap-1 cursor-pointer">
-                                                {col} <ChevronsUpDown size={12} className="opacity-30" />
-                                            </div>
-                                        </th>
-                                    ))}
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r border-gray-100">
+                                        Order ID
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r border-gray-100">
+                                        Order Date
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r border-gray-100">
+                                        Customer
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r border-gray-100">
+                                        Total Amount
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r border-gray-100">
+                                        Status
+                                    </th>
+                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 text-center">
+                                        Actions
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                                 {paginatedOrders.map((o) => (
                                     <tr key={o.id} className="hover:bg-[#f8faf9]/80 transition-colors group">
-                                        <td className="p-4 text-center">
+                                        <td className="p-4 text-center border-r border-gray-100">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.includes(o.id)} onChange={() => setSelectedIds(prev => prev.includes(o.id) ? prev.filter(i => i !== o.id) : [...prev, o.id])} />
                                         </td>
-                                        <td className="p-4 text-xs font-bold text-[#005d52]">{o.id}</td>
-                                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{o.date}</td>
-                                        <td className="p-4 text-xs text-gray-800 font-medium">{o.customer}</td>
-                                        <td className="p-4 text-xs text-gray-800 font-bold">{o.amount}</td>
-                                        <td className="p-4">
+                                        <td className="p-4 text-xs font-bold text-[#005d52] border-r border-gray-100">
+                                            {o.id}
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap border-r border-gray-100">
+                                            {o.date}
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                            {o.customer}
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-800 font-bold border-r border-gray-100">
+                                            {o.amount}
+                                        </td>
+                                        <td className="p-4 border-r border-gray-100">
                                             <span className={`px-3 py-1 rounded-full border text-[10px] font-bold whitespace-nowrap ${getStatusColor(o.status)}`}>
                                                 {o.status}
                                             </span>
                                         </td>
                                         <td className="p-4">
-                                            <div className="flex gap-0.5 justify-end">
-                                                <button title="View" onClick={() => navigate(`/sales/order-view/${o.id}`)} className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all"><Eye size={15}/></button>
-                                                <button title="Download" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all"><Download size={15}/></button>
-                                                <button title="Delete" className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setOrders(prev => prev.filter(x => x.id !== o.id))}><Trash2 size={15}/></button>
+                                            <div className="flex gap-0.5 justify-center">
+                                                <button title="View" onClick={() => navigate(`/sales/order-view/${o.id}`)} className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
+                                                    <Eye size={15}/>
+                                                </button>
+                                                <button title="Download" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all">
+                                                    <Download size={15}/>
+                                                </button>
+                                                <button title="Delete" className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setOrders(prev => prev.filter(x => x.id !== o.id))}>
+                                                    <Trash2 size={15}/>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -271,13 +296,19 @@ const OrderList: React.FC = () => {
                             Showing <span className="text-gray-900">{paginatedOrders.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredOrders.length)}</span> of <span className="text-gray-900">{filteredOrders.length}</span> Results
                         </div>
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors"><ChevronLeft size={20} /></button>
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors">
+                                <ChevronLeft size={20} />
+                            </button>
                             <div className="flex gap-2">
                                 {[...Array(totalPages)].map((_, i) => (
-                                    <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${currentPage === i + 1 ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20" : "text-gray-400 hover:bg-gray-100"}`}>{i + 1}</button>
+                                    <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${currentPage === i + 1 ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20" : "text-gray-400 hover:bg-gray-100"}`}>
+                                        {i + 1}
+                                    </button>
                                 ))}
                             </div>
-                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors"><ChevronRight size={20} /></button>
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors">
+                                <ChevronRight size={20} />
+                            </button>
                         </div>
                     </footer>
                 </div>
