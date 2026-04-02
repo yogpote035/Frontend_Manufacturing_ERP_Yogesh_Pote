@@ -68,7 +68,7 @@ const Navbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
           <input
             type="text"
             placeholder="Search..."
-            className="w-full bg-white rounded-full py-2.5 pl-11 pr-4 text-sm shadow-sm focus:ring-2 focus:ring-[#005d52]/20 outline-none"
+            className="w-full bg-white rounded-2xl py-2.75 pl-11 pr-4 text-sm shadow-sm focus:ring-2 focus:ring-[#005d52]/20 outline-none"
           />
         </div>
       </div>

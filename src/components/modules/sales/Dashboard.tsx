@@ -73,7 +73,7 @@ const DATA: Record<Exclude<FilterType, "Custom">, DataPoint> = {
     products: [{ name: "Fridge", sold: 980, target: 900 }, { name: "AC", sold: 1200, target: 1100 }, { name: "Wash", sold: 750, target: 800 }, { name: "Micro", sold: 600, target: 550 }, { name: "Heat", sold: 500, target: 600 }],
   },
   Yearly: {
-    range: "FY 2023-24",
+    range: "FY 2025-26",
     stats: { leads: "7.2K", won: 2100, revenue: "142M", rate: "31%" },
     pipeline: [
       { name: "New", value: 2000 }, { name: "Not Contacted", value: 1700 },
@@ -115,7 +115,7 @@ const StatCard = ({ title, value, svg }: StatCardProps) => (
 
 export const Dashboard = () => {
   const [filter, setFilter] = useState<FilterType>("Weekly");
-  const [customRange, setCustomRange] = useState({ start: "", end: "" });
+  const [customRange, setCustomRange] = useState({ start: "", end: new Date().toISOString().split("T")[0] });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
@@ -152,7 +152,7 @@ export const Dashboard = () => {
             <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Dashboard</h1>
             <p className="text-sm text-gray-400 mt-1 font-normal">Full customer pipeline overview</p>
             <div className="flex items-center gap-2 mt-4">
-              <div className="flex items-center gap-2 bg-[#005d52] text-white px-4 py-1.5 rounded-full text-[11px] font-bold shadow-lg shadow-teal-900/10">
+              <div className="flex items-center gap-2 bg-[#005d52] text-white px-4 py-2.75 rounded-2xl text-[11px] font-bold shadow-lg shadow-teal-900/10">
                 <CalendarIcon size={13} />
                 {filter === "Custom" ?
                   (customRange.start ? `${customRange.start} to ${customRange.end || '...'}` : "Custom Selection")
@@ -244,7 +244,7 @@ export const Dashboard = () => {
                 <BarChart data={currentData.pipeline} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={isMobile ? false : { fill: '#7e899c', fontSize: 10, fontWeight: 500 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10, fontWeight:500 }} />
                   <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
                   <Bar
                     dataKey="value"
@@ -302,7 +302,7 @@ export const Dashboard = () => {
                 <BarChart data={currentData.products} margin={{ top: 10, right: 10, left: -25, bottom: 0 }} barGap={8}>
                   <CartesianGrid vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10, fontWeight: 500 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#7e899c', fontSize: 10 ,fontWeight: 500}} />
                   <Tooltip cursor={{ fill: 'transparent' }} />
                   <Bar dataKey="sold" fill="#005d52" radius={[6, 6, 0, 0]} barSize={28} />
                   <Bar dataKey="target" fill="#b0d9d9" radius={[6, 6, 0, 0]} barSize={28} />

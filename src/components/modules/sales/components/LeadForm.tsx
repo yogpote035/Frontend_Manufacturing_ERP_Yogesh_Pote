@@ -1,5 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
-import type { ChangeEvent } from "react";
+﻿import React, { useState, useMemo } from "react";
 import { 
     ChevronRight, 
     Building2, 
@@ -10,7 +9,9 @@ import {
     ArrowLeft,
     Trash2,
     Save,
-    MapPin
+    MapPin,
+    AlertCircle,
+    CheckCircle2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -40,7 +41,31 @@ interface ProductItem {
     quantity: number;
     unit: string;
     estValue: number;
-    assignedTo: string;
+}
+
+interface ValidationErrors {
+    [key: string]: string;
+}
+
+// --- Sub-Component Props ---
+interface InputProps {
+    label: string;
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    placeholder?: string;
+    type?: string;
+    required?: boolean;
+    error?: string;
+}
+
+interface SelectProps {
+    label: string;
+    name: string;
+    value: string;
+    options: string[];
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    error?: string;
 }
 
 const LeadForm: React.FC = () => {
@@ -57,267 +82,309 @@ const LeadForm: React.FC = () => {
         city: "",
         state: "",
         leadSource: "",
-        priority: "",
+        priority: "Warm",
         expectedDecisionDate: "",
         followUpDate: "",
-        initialStatus: "",
+        initialStatus: "New Lead",
         address: "",
         notes: "",
     });
 
     const [products, setProducts] = useState<ProductItem[]>([
-        { id: Date.now(), product: "", variant: "Advance", quantity: 1, unit: "Units", estValue: 0, assignedTo: "" }
+        { id: Date.now(), product: "", variant: "", quantity: 1, unit: "Units", estValue: 0 }
     ]);
 
-    const [summary, setSummary] = useState({ totalQty: 0, totalValue: 0 });
+    const [errors, setErrors] = useState<ValidationErrors>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        const qty = products.reduce((acc, curr) => acc + Number(curr.quantity), 0);
-        const val = products.reduce((acc, curr) => acc + (Number(curr.quantity) * Number(curr.estValue)), 0);
-        setSummary({ totalQty: qty, totalValue: val });
+    // --- Totals Calculation ---
+    const summary = useMemo(() => {
+        const qty = products.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
+        const val = products.reduce((acc, curr) => acc + ((Number(curr.quantity) || 0) * (Number(curr.estValue) || 0)), 0);
+        return { totalQty: qty, totalValue: val };
     }, [products]);
 
+    // --- Validation Logic ---
+    const validate = (): boolean => {
+        const newErrors: ValidationErrors = {};
+        if (!formData.companyName.trim()) newErrors.companyName = "Company name is required";
+        if (!formData.contactPerson.trim()) newErrors.contactPerson = "Contact person is required";
+        if (!/^\d{10}$/.test(formData.phoneNumber)) newErrors.phoneNumber = "Valid 10-digit phone required";
+        if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email format";
+        
+        products.forEach((p, idx) => {
+            if (!p.product) newErrors[`prod_${idx}`] = "Select product";
+            if (p.quantity <= 0) newErrors[`qty_${idx}`] = "Min 1";
+        });
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     // --- Handlers ---
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => {
+            const temp = { ...prev };
+            delete temp[name];
+            return temp;
+        });
     };
 
     const handleProductChange = (id: number, field: keyof ProductItem, value: string | number) => {
-        setProducts(products.map(p => p.id === id ? { ...p, [field]: value } : p));
+        setProducts(prev => prev.map(p => {
+            if (p.id === id) {
+                // Prevent negative numbers
+                if ((field === 'quantity' || field === 'estValue')) {
+                    const numVal = Math.max(0, Number(value));
+                    return { ...p, [field]: numVal };
+                }
+                return { ...p, [field]: value };
+            }
+            return p;
+        }));
     };
 
     const addProduct = () => {
-        setProducts([...products, { id: Date.now(), product: "", variant: "Standard", quantity: 1, unit: "Units", estValue: 0, assignedTo: "" }]);
+        setProducts(prev => [...prev, { id: Date.now(), product: "", variant: "", quantity: 1, unit: "Units", estValue: 0 }]);
     };
 
     const removeProduct = (id: number) => {
-        if (products.length > 1) setProducts(products.filter(p => p.id !== id));
+        if (products.length > 1) setProducts(prev => prev.filter(p => p.id !== id));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (validate()) {
+            setIsSubmitting(true);
+            // Simulation of API Call
+            setTimeout(() => {
+                setIsSubmitting(false);
+                navigate("/leads");
+            }, 1000);
+        }
     };
 
     return (
-        <div className="min-h-screen bg-[#f4f7f6] p-4 sm:p-6 lg:p-8 font-sans text-gray-900">
-            <div className="max-w-5xl mx-auto">
+        <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-10 font-sans text-slate-900">
+            <div className="max-w-6xl mx-auto">
                 
-                {/* Breadcrumbs & Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                {/* Header & Actions */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
-                        <div className="flex items-center gap-2 text-gray-400 mb-1 text-sm">
-                            <button onClick={() => navigate(-1)} className="hover:text-[#005d52] flex items-center gap-1">
-                                <ArrowLeft size={14} /> Leads
+                        <div className="flex items-center gap-2 text-slate-400 mb-1 text-sm font-medium">
+                            <button onClick={() => navigate(-1)} className="hover:text-[#005d52] flex items-center gap-1 transition-colors">
+                                <ArrowLeft size={16} /> Leads
                             </button>
                             <ChevronRight size={14} />
-                            <span className="text-gray-800 font-medium">New Lead</span>
+                            <span className="text-slate-600">New Lead</span>
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-800">Create New Lead</h1>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create New Lead</h1>
                     </div>
-                    <div className="flex gap-3 w-full sm:w-auto">
-                        <button className="flex-1 sm:flex-none px-6 py-2.5 rounded-full font-bold text-sm text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all">
+                    <div className="flex gap-3 w-full md:w-auto">
+                        <button 
+                            type="button"
+                            className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
+                        >
                             Save Draft
                         </button>
-                        <button className="flex-1 sm:flex-none px-6 py-2.5 rounded-full font-bold text-sm text-white bg-[#005d52] shadow-lg shadow-teal-900/20 hover:bg-[#004a41] transition-all">
-                            Create Lead
+                        <button 
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                            className="flex-1 md:flex-none px-8 py-3 rounded-xl font-bold text-sm text-white bg-[#005d52] shadow-lg shadow-teal-900/20 hover:bg-[#004a41] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                        >
+                            {isSubmitting ? "Saving..." : <><Save size={18} /> Create Lead</>}
                         </button>
                     </div>
                 </div>
 
-                {/* Stepper Progress */}
-                <div className="bg-white rounded-3xl p-6 mb-8 border border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
-                    <div className="flex items-center justify-between min-w-150 px-8">
+                {/* Progress Stepper */}
+                <div className="bg-white rounded-2xl p-6 mb-8 border border-slate-100 shadow-sm overflow-hidden">
+                    <div className="flex items-center justify-between max-w-2xl mx-auto">
                         {[
-                            { step: 1, label: "Customer Info", active: true },
-                            { step: 2, label: "Product Selection", active: false },
-                            { step: 3, label: "Assignment", active: false },
-                            { step: 4, label: "Review", active: false }
+                            { step: 1, label: "Details", active: true },
+                            { step: 2, label: "Products", active: false },
+                            { step: 3, label: "Review", active: false }
                         ].map((item, idx) => (
                             <React.Fragment key={item.step}>
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                                        item.active ? 'bg-[#005d52] text-white' : 'bg-gray-100 text-gray-400'
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all ${
+                                        item.active ? 'bg-[#005d52] border-[#005d52] text-white shadow-md' : 'bg-white border-slate-200 text-slate-300'
                                     }`}>
                                         {item.step}
                                     </div>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${item.active ? 'text-[#005d52]' : 'text-gray-400'}`}>
+                                    <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${item.active ? 'text-[#005d52]' : 'text-slate-400'}`}>
                                         {item.label}
                                     </span>
                                 </div>
-                                {idx < 3 && <div className="h-0.5 flex-1 bg-gray-100 mx-4" />}
+                                {idx < 2 && <div className="h-[2px] flex-1 bg-slate-100 mx-4" />}
                             </React.Fragment>
                         ))}
                     </div>
                 </div>
 
-                {/* Form Card */}
-                <div className="bg-white rounded-4xl shadow-sm border border-gray-100 overflow-hidden">
-                    <form className="p-8 lg:p-12 space-y-12">
-                        
-                        {/* Section 1: Customer Info */}
-                        <section>
-                            <SectionHeader icon={<Building2 size={18}/>} title="Company Information" />
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <FormInput label="Company Name" name="companyName" placeholder="e.g. Rajesh Electronics" value={formData.companyName} onChange={handleInputChange} required />
-                                <FormInput label="Contact Person" name="contactPerson" placeholder="Full Name" value={formData.contactPerson} onChange={handleInputChange} required />
-                                <FormInput label="Designation" name="designation" placeholder="e.g. Proprietor" value={formData.designation} onChange={handleInputChange} />
-                                <FormInput label="Phone Number" name="phoneNumber" placeholder="+91 00000 00000" value={formData.phoneNumber} onChange={handleInputChange} required />
-                                <FormInput label="Email Address" name="email" placeholder="email@company.com" type="email" value={formData.email} onChange={handleInputChange} />
-                                <FormInput label="GST Number" name="gstNumber" placeholder="27XXXXX0000X0Z0" value={formData.gstNumber} onChange={handleInputChange} />
-                                <FormInput label="City" name="city" placeholder="Pune" value={formData.city} onChange={handleInputChange} />
-                                <FormInput label="State" name="state" placeholder="Maharashtra" value={formData.state} onChange={handleInputChange} />
-                                <FormSelect label="Lead Source" name="leadSource" value={formData.leadSource} onChange={handleInputChange} options={["Website", "Trade Show", "Referral", "Cold Call"]} />
-                            </div>
-                        </section>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* Section 1: Customer Info */}
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <SectionHeader icon={<Building2 size={20}/>} title="Company Information" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <FormInput label="Company Name" name="companyName" value={formData.companyName} onChange={handleInputChange} required error={errors.companyName} placeholder="e.g. Acme Corp" />
+                            <FormInput label="Contact Person" name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} required error={errors.contactPerson} />
+                            <FormInput label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} required error={errors.phoneNumber} placeholder="10-digit number" />
+                            <FormInput label="Email Address" name="email" type="email" value={formData.email} onChange={handleInputChange} error={errors.email} />
+                            <FormInput label="Designation" name="designation" value={formData.designation} onChange={handleInputChange} />
+                            <FormInput label="GST Number" name="gstNumber" value={formData.gstNumber} onChange={handleInputChange} placeholder="Optional" />
+                            <FormInput label="City" name="city" value={formData.city} onChange={handleInputChange} />
+                            <FormInput label="State" name="state" value={formData.state} onChange={handleInputChange} />
+                            <FormSelect label="Lead Source" name="leadSource" value={formData.leadSource} onChange={handleInputChange} options={["Website", "Cold Call", "Referral", "Event"]} />
+                        </div>
+                    </div>
 
-                        {/* Section 2: Products */}
-                        <section>
-                            <SectionHeader icon={<Package size={18}/>} title="Products of Interest" />
-                            <div className="space-y-4">
-                                {products.map((item) => (
-                                    <div key={item.id} className="group relative grid grid-cols-1 md:grid-cols-12 gap-4 p-6 bg-gray-50/50 rounded-3xl border border-gray-100 items-end transition-all hover:bg-gray-50">
-                                        <div className="md:col-span-3">
-                                            <FormSelect label="Select Product" name="product" value={item.product} onChange={(e) => handleProductChange(item.id, 'product', e.target.value)} options={["Refrigerator", "AC", "Washing Machine", "Microwave"]} />
-                                        </div>
-                                        <div className="md:col-span-3">
-                                            <FormInput label="Variant" name="variant" placeholder="Model" value={item.variant} onChange={(e) => handleProductChange(item.id, 'variant', e.target.value)} />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <FormInput label="Qty" name="quantity" type="number" value={String(item.quantity)} onChange={(e) => handleProductChange(item.id, 'quantity', e.target.value)} />
-                                        </div>
-                                        <div className="md:col-span-3">
-                                            <FormInput label="Est. Unit Value (₹)" name="estValue" type="number" value={String(item.estValue)} onChange={(e) => handleProductChange(item.id, 'estValue', e.target.value)} />
-                                        </div>
-                                        <div className="md:col-span-1 flex justify-center pb-2">
-                                            <button type="button" onClick={() => removeProduct(item.id)} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
+                    {/* Section 2: Products */}
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <SectionHeader icon={<Package size={20}/>} title="Requirement Analysis" />
+                        <div className="space-y-4">
+                            {products.map((item, idx) => (
+                                <div key={item.id} className="relative grid grid-cols-1 md:grid-cols-12 gap-4 p-5 bg-slate-50/50 rounded-2xl border border-slate-100 items-start hover:bg-slate-50 transition-colors">
+                                    <div className="md:col-span-4">
+                                        <FormSelect label="Product" name={`prod_${idx}`} value={item.product} onChange={(e) => handleProductChange(item.id, 'product', e.target.value)} options={["Industrial Lathe", "Milling Machine", "Drill Press"]} />
+                                        {errors[`prod_${idx}`] && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors[`prod_${idx}`]}</p>}
                                     </div>
-                                ))}
-                                
-                                <button type="button" onClick={addProduct} className="flex items-center gap-2 text-[#005d52] font-bold text-xs uppercase tracking-widest p-2 hover:opacity-70 transition-opacity">
-                                    <Plus size={16} strokeWidth={3} /> Add Another Product
-                                </button>
-                            </div>
-
-                            {/* Summary Totals Card */}
-                            <div className="mt-8 bg-[#005d52] rounded-3xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl shadow-teal-900/20">
-                                <div className="flex gap-12">
-                                    <div>
-                                        <p className="text-[10px] uppercase opacity-60 font-bold tracking-widest mb-1">Total Quantity</p>
-                                        <p className="text-xl font-bold">{summary.totalQty} Units</p>
+                                    <div className="md:col-span-3">
+                                        <FormInput label="Variant/Specs" name={`var_${idx}`} value={item.variant} onChange={(e) => handleProductChange(item.id, 'variant', e.target.value)} placeholder="Model No." />
                                     </div>
-                                    <div className="w-px h-10 bg-white/20 hidden md:block" />
-                                    <div>
-                                        <p className="text-[10px] uppercase opacity-60 font-bold tracking-widest mb-1">Est. Deal Value</p>
-                                        <p className="text-xl font-bold">₹ {summary.totalValue.toLocaleString('en-IN')}L</p>
+                                    <div className="md:col-span-2">
+                                        <FormInput label="Qty" type="number" name={`qty_${idx}`} value={String(item.quantity)} onChange={(e) => handleProductChange(item.id, 'quantity', e.target.value)} error={errors[`qty_${idx}`]} />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <FormInput label="Price (₹)" type="number" name={`val_${idx}`} value={String(item.estValue)} onChange={(e) => handleProductChange(item.id, 'estValue', e.target.value)} />
+                                    </div>
+                                    <div className="md:col-span-1 flex justify-center pt-7">
+                                        <button type="button" onClick={() => removeProduct(item.id)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                                            <Trash2 size={18} />
+                                        </button>
                                     </div>
                                 </div>
-                                <p className="text-xs opacity-70 italic max-w-xs text-center md:text-right">
-                                    Values are approximate based on current market rates. Final pricing will be in the quotation.
-                                </p>
-                            </div>
-                        </section>
-
-                        {/* Section 3: Logistics & Address */}
-                        <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                            <div className="space-y-6">
-                                <SectionHeader icon={<FileText size={18}/>} title="Lead Logistics" />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <FormSelect label="Priority" name="priority" value={formData.priority} onChange={handleInputChange} options={["Hot", "Warm", "Cold"]} />
-                                    <FormSelect label="Initial Status" name="initialStatus" value={formData.initialStatus} onChange={handleInputChange} options={["New Lead", "Contacted", "Qualified"]} />
-                                    <FormInput label="Decision Date" name="expectedDecisionDate" type="date" value={formData.expectedDecisionDate} onChange={handleInputChange} />
-                                    <FormInput label="Follow-up Date" name="followUpDate" type="date" value={formData.followUpDate} onChange={handleInputChange} />
-                                </div>
-                            </div>
-                            <div className="space-y-6">
-                                <SectionHeader icon={<MapPin size={18}/>} title="Site Address" />
-                                <textarea 
-                                    name="address"
-                                    placeholder="Full delivery/installation address..."
-                                    rows={4}
-                                    className="w-full bg-gray-50 border border-gray-100 rounded-3xl p-5 text-sm focus:ring-2 focus:ring-[#005d52]/10 outline-none transition-all resize-none"
-                                    value={formData.address}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </section>
-
-                        {/* Section 4: Notes */}
-                        <section>
-                            <SectionHeader icon={<Save size={18}/>} title="Internal Remarks" />
-                            <div className="bg-[#f1f8f7] rounded-3xl p-6 border-l-4 border-[#005d52]">
-                                <textarea 
-                                    name="notes"
-                                    placeholder="Add any specific requirements or background info here..."
-                                    className="w-full bg-transparent border-none text-sm text-gray-700 italic focus:ring-0 outline-none resize-none"
-                                    rows={3}
-                                    value={formData.notes}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </section>
-
-                        {/* Final Actions */}
-                        <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-50">
-                            <button type="button" onClick={() => navigate(-1)} className="order-2 sm:order-1 flex-1 py-3 font-bold text-gray-400 hover:text-gray-600 transition-colors">
-                                Discard Changes
-                            </button>
-                            <button type="submit" className="order-1 sm:order-2 flex-2 bg-[#005d52] text-white py-4 rounded-full font-bold text-lg shadow-xl shadow-teal-900/20 hover:bg-[#004a41] transition-all flex items-center justify-center gap-3">
-                                <Save size={20} /> Save & Finalize Lead
+                            ))}
+                            <button type="button" onClick={addProduct} className="flex items-center gap-2 text-[#005d52] font-black text-xs uppercase tracking-widest px-4 py-2 hover:bg-teal-50 rounded-lg transition-all">
+                                <Plus size={16} strokeWidth={3} /> Add Another Item
                             </button>
                         </div>
 
-                    </form>
-                </div>
+                        {/* Totals Summary */}
+                        <div className="mt-8 bg-[#005d52] rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl shadow-teal-900/20">
+                            <div className="flex gap-12">
+                                <div>
+                                    <p className="text-[10px] uppercase text-teal-200 font-black tracking-widest mb-1">Total Quantity</p>
+                                    <p className="text-2xl font-black">{summary.totalQty} Units</p>
+                                </div>
+                                <div className="w-[1px] h-12 bg-white/10 hidden md:block" />
+                                <div>
+                                    <p className="text-[10px] uppercase text-teal-200 font-black tracking-widest mb-1">Estimated Value</p>
+                                    <p className="text-2xl font-black">₹ {summary.totalValue.toLocaleString('en-IN')}</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="flex items-center gap-2 text-xs text-teal-100 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                                    <CheckCircle2 size={14} /> Live Valuation Active
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Logistics */}
+                        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                            <SectionHeader icon={<FileText size={20}/>} title="Lead Strategy" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <FormSelect label="Priority" name="priority" value={formData.priority} onChange={handleInputChange} options={["Hot", "Warm", "Cold"]} />
+                                <FormSelect label="Status" name="initialStatus" value={formData.initialStatus} onChange={handleInputChange} options={["New Lead", "Contacted", "Awaiting Quote"]} />
+                                <FormInput label="Decision Date" name="expectedDecisionDate" type="date" value={formData.expectedDecisionDate} onChange={handleInputChange} />
+                                <FormInput label="Follow-up Date" name="followUpDate" type="date" value={formData.followUpDate} onChange={handleInputChange} />
+                            </div>
+                        </div>
+
+                        {/* Address */}
+                        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                            <SectionHeader icon={<MapPin size={20}/>} title="Delivery Site" />
+                            <textarea 
+                                name="address"
+                                placeholder="Full factory/office address..."
+                                rows={4}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-teal-500/5 focus:border-[#005d52] outline-none transition-all resize-none"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Remarks */}
+                    <div className="bg-[#f1f8f7] rounded-3xl p-6 border-l-8 border-[#005d52]">
+                        <SectionHeader icon={<Save size={20}/>} title="Internal Remarks" />
+                        <textarea 
+                            name="notes"
+                            placeholder="Add specific client requests or technical notes..."
+                            className="w-full bg-transparent border-none text-sm text-slate-700 italic focus:ring-0 outline-none resize-none"
+                            rows={3}
+                            value={formData.notes}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                </form>
             </div>
         </div>
     );
 };
 
-// --- Sub-Components ---
+// --- Sub-Components (Strictly Typed) ---
 
 const SectionHeader: React.FC<{ icon: React.ReactNode; title: string }> = ({ icon, title }) => (
-    <div className="flex items-center gap-3 mb-8">
-        <div className="p-2.5 bg-[#d1e9e7] text-[#005d52] rounded-xl">
+    <div className="flex items-center gap-3 mb-6">
+        <div className="p-2.5 bg-teal-50 text-[#005d52] rounded-xl border border-teal-100 shadow-sm">
             {icon}
         </div>
-        <h3 className="font-bold text-lg text-gray-800">{title}</h3>
+        <h3 className="font-bold text-xl text-slate-800 tracking-tight">{title}</h3>
     </div>
 );
 
-const FormInput: React.FC<{ label: string; name: string; placeholder?: string; type?: string; value: string; onChange: (e: any) => void; required?: boolean }> = ({ 
-    label, name, placeholder, type = "text", value, onChange, required 
+const FormInput: React.FC<InputProps> = ({ 
+    label, name, value, onChange, placeholder, type = "text", required, error 
 }) => (
-    <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">
-            {label} {required && <span className="text-red-400">*</span>}
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+            {label} {required && <span className="text-red-500">*</span>}
         </label>
-        <input 
-            type={type}
-            name={name}
-            placeholder={placeholder}
-            value={value}
-            onChange={onChange}
-            className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#005d52]/10 focus:border-[#005d52] outline-none transition-all"
-        />
+        <div className="relative">
+            <input 
+                type={type}
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                className={`w-full bg-slate-50 border ${error ? 'border-red-300 ring-4 ring-red-50' : 'border-slate-200'} rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-teal-500/5 focus:border-[#005d52] outline-none transition-all`}
+            />
+            {error && <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" size={16} />}
+            {!error && value && required && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-500" size={16} />}
+        </div>
+        {error && <p className="text-[10px] text-red-500 font-bold uppercase px-1">{error}</p>}
     </div>
 );
 
-const FormSelect: React.FC<{ label: string; name: string; value: string; options: string[]; onChange: (e: any) => void }> = ({ 
-    label, name, value, options, onChange 
-}) => (
-    <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">{label}</label>
+const FormSelect: React.FC<SelectProps> = ({ label, name, value, options, onChange, error }) => (
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{label}</label>
         <div className="relative">
             <select 
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#005d52]/10 outline-none appearance-none cursor-pointer transition-all"
+                className={`w-full bg-slate-50 border ${error ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-teal-500/5 focus:border-[#005d52] outline-none appearance-none cursor-pointer transition-all`}
             >
-                <option value="">Select Option</option>
+                <option value="">Choose Option</option>
                 {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" size={16} />
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
         </div>
     </div>
 );

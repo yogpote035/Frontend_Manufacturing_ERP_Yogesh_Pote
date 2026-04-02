@@ -66,7 +66,7 @@ const LeadList: React.FC = () => {
     const itemsPerPage = 8;
 
     // Filter States
-    const [customRange, setCustomRange] = useState({ start: "", end: "" });
+    const [customRange, setCustomRange] = useState({ start: "", end: new Date().toISOString().split("T")[0] });
     const [priorityFilter, setPriorityFilter] = useState<Priority>("All");
     const [statusFilter, setStatusFilter] = useState<Status>("All");
     const [sourceFilter, setSourceFilter] = useState<Source>("All");
@@ -98,7 +98,7 @@ const LeadList: React.FC = () => {
 
             let matchesTime = true;
             const leadDate = new Date(lead.createdAt);
-            const now = new Date("2026-03-20");
+            const now = new Date(new Date().toISOString().split("T")[0]);
 
             if (activeTab === "Custom") {
                 const start = customRange.start ? new Date(customRange.start) : null;
@@ -190,7 +190,7 @@ const LeadList: React.FC = () => {
                                         type="date"
                                         value={customRange.start}
                                         onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+                                        className="w-full p-3 bg-gray-50 text-[#005d52] border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
                                     />
                                 </div>
                                 <div className="grid gap-1">
@@ -199,7 +199,7 @@ const LeadList: React.FC = () => {
                                         type="date"
                                         value={customRange.end}
                                         onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+                                        className="w-full p-3 bg-gray-50 text-[#005d52] border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
                                     />
                                 </div>
                                 <button
