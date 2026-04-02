@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
-    Plus, ChevronDown, Search, Trash2, ChevronLeft, ChevronRight, ChevronsUpDown, Calendar as CalendarIcon, Eye, Download, X
+    Plus, ChevronDown, Search, Trash2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Eye, Download, X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,7 +8,7 @@ import {
     isDateInRange,
     isDateWithinCustomRange,
     type DateRange,
-    type TimeTab as BaseDateTab,
+    type TimeTab,
 } from "../utils/dateFilters";
 
 type TimeTabWithCustom = TimeTab | "Custom";

@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChevronRight, Building2, Download, List, Truck, CheckCircle, Clock } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-// @ts-ignore
 import html2pdf from 'html2pdf.js';
 
 const OrderView: React.FC = () => {
@@ -12,7 +11,7 @@ const OrderView: React.FC = () => {
         { name: 'Order Placed', completed: true },
         { name: 'Processing', completed: true },
         { name: 'Dispatched', completed: false },
-        { name: 'Delivered', completed: false },
+        { name: 'Delivered', completed: false },  
     ];
 
     const lineItems = [
