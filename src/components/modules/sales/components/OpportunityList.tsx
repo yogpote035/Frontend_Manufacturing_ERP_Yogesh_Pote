@@ -19,13 +19,13 @@ import {
     isDateInRange,
     isDateWithinCustomRange,
     type DateRange,
-    type TimeTab,
 } from "../utils/dateFilters";
 
 // --- Types ---
 type Priority = "High" | "Medium" | "Low" | "All";
 type Stage = "Discovery" | "Proposal" | "Negotiation" | "Closed Won" | "Closed Lost" | "All";
 type Source = "Dealer" | "Website" | "Referral" | "Trade Show" | "Cold Call" | "All";
+type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time" | "Custom";
 type Opportunity = {
     id: string;
     company: string;
