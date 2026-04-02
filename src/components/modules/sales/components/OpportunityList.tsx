@@ -221,7 +221,7 @@ const OpportunityList: React.FC = () => {
                             <button 
                                 onClick={() => {setOpportunities(prev => prev.filter(o => !selectedIds.includes(o.id))); setSelectedIds([])}}
                                 disabled={selectedIds.length === 0} 
-                                className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-20 hover:bg-red-100 transition-colors"
+                                className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-40 hover:bg-red-100 transition-colors"
                             >
                                 <Trash2 size={18} />
                             </button>
