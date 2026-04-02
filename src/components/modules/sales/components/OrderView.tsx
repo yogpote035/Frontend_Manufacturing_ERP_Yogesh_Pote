@@ -11,7 +11,7 @@ const OrderView: React.FC = () => {
         { name: 'Order Placed', completed: true },
         { name: 'Processing', completed: true },
         { name: 'Dispatched', completed: false },
-        { name: 'Delivered', completed: false },
+        { name: 'Delivered', completed: false },  
     ];
 
     const lineItems = [
