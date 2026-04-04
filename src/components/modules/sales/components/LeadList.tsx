@@ -237,7 +237,7 @@ const LeadList: React.FC = () => {
                                 <div key={f.label} className="relative">
                                     <button
                                         onClick={() => setOpenDropdown(openDropdown === f.label ? null : f.label)}
-                                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${f.value !== "All" ? "bg-teal-50 border-[#005d52] text-[#005d52]" : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"}`}
+                                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold transition-all ${f.value !== "All" ? "bg-teal-50 border-[#005d52] text-[#005d52]" : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"}`}
                                     >
                                         {f.value === "All" ? f.label : f.value} <ChevronDown size={14} className={openDropdown === f.label ? "rotate-180 transition-transform" : "transition-transform"} />
                                     </button>
@@ -247,7 +247,7 @@ const LeadList: React.FC = () => {
                                                 <button
                                                     key={opt}
                                                     onClick={() => { f.setter(opt as any); setOpenDropdown(null); setCurrentPage(1); }}
-                                                    className={`w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 transition-colors ${f.value === opt ? "text-[#005d52] font-bold" : "text-gray-600 font-normal"}`}
+                                                    className={`w-full text-left px-4 py-2.5 text-[13px] hover:bg-gray-50 transition-colors ${f.value === opt ? "text-[#005d52] font-bold" : "text-gray-600 font-normal"}`}
                                                 >
                                                     {opt}
                                                 </button>
@@ -282,37 +282,37 @@ const LeadList: React.FC = () => {
                                     </th>
 
                                     {/* Lead ID - Small fixed width */}
-                                    <th className="w-20 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
+                                    <th className="w-20 p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
                                         ID
                                     </th>
 
                                     {/* Date Created - Medium fixed width */}
-                                    <th className="w-28 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
+                                    <th className="w-28 p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
                                         Created
                                     </th>
 
                                     {/* Company Name - Flexible width */}
-                                    <th className="p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
+                                    <th className="p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
                                         Company
                                     </th>
 
                                     {/* Product Name - Flexible width */}
-                                    <th className="p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
+                                    <th className="p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100">
                                         Product
                                     </th>
 
                                     {/* Quantity - Small fixed width */}
-                                    <th className="w-20 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100 text-center">
+                                    <th className="w-20 p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100 text-center">
                                         Qty
                                     </th>
 
                                     {/* Status - Fixed width for badges */}
-                                    <th className="w-32 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100 text-center">
+                                    <th className="w-32 p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-r border-gray-100 text-center">
                                         Status
                                     </th>
 
                                     {/* Actions - Fixed width */}
-                                    <th className="w-28 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center">
+                                    <th className="w-28 p-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center">
                                         Actions
                                     </th>
                                 </tr>
@@ -330,28 +330,28 @@ const LeadList: React.FC = () => {
                                             />
                                         </td>
 
-                                        <td className="p-3 text-xs font-bold text-[#005d52] border-r border-gray-100">
+                                        <td className="p-3 text-[13px] font-bold text-[#005d52] border-r border-gray-100">
                                             {lead.id}
                                         </td>
 
-                                        <td className="p-3 text-xs text-gray-500 border-r border-gray-100 whitespace-nowrap">
+                                        <td className="p-3 text-[13px] text-gray-800 border-r border-gray-100 whitespace-nowrap">
                                             {lead.createdAt}
                                         </td>
 
-                                        <td className="p-3 text-xs text-gray-800 border-r border-gray-100 truncate max-w-0" title={lead.company}>
+                                        <td className="p-3 text-[13px] text-gray-800 border-r border-gray-100 truncate max-w-0" title={lead.company}>
                                             {lead.company}
                                         </td>
 
-                                        <td className="p-3 text-xs text-gray-600 border-r border-gray-100 truncate max-w-0" title={lead.product}>
+                                        <td className="p-3 text-[13px] text-gray-800 border-r border-gray-100 truncate max-w-0" title={lead.product}>
                                             {lead.product}
                                         </td>
 
-                                        <td className="p-3 text-xs border-r border-gray-100 text-center">
-                                            <span className="text-gray-900">{lead.quantity}</span>
-                                            <span className="text-[10px] text-gray-400 ml-1 uppercase">{lead.unit}</span>
+                                        <td className="p-3 text-[13px] border-r border-gray-100 text-center">
+                                            <span className="text-gray-800">{lead.quantity}</span>
+                                            <span className="text-[11px] text-gray-500 ml-1 uppercase">{lead.unit}</span>
                                         </td>
 
-                                        <td className="p-3 text-center border-r border-gray-100">
+                                        <td className="p-3 text-[13px] text-center border-r border-gray-100">
                                             <span className={getStatusStyle(lead.status)}>
                                                 {lead.status}
                                             </span>

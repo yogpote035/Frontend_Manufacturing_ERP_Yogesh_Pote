@@ -119,12 +119,12 @@ const navigate = useNavigate();
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50">
-                <th className="px-6 py-5 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100 text-center">Employee Name</th>
-                <th className="px-6 py-5 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100">Designation</th>
-                <th className="px-6 py-5 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100">Contact Info</th>
-                <th className="px-6 py-5 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100 text-center">Status</th>
-                <th className="px-6 py-5 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100">Joined Date</th>
-                <th className="px-6 py-5 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 text-center">Actions</th>
+                <th className="px-6 py-5 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100 text-center">Employee Name</th>
+                <th className="px-6 py-5 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100">Designation</th>
+                <th className="px-6 py-5 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100">Contact Info</th>
+                <th className="px-6 py-5 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100 text-center">Status</th>
+                <th className="px-6 py-5 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-r border-gray-100">Joined Date</th>
+                <th className="px-6 py-5 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -132,57 +132,57 @@ const navigate = useNavigate();
                 <tr key={emp.id} className="hover:bg-[#f4f7f6]/50 transition-colors group">
                   <td className="px-6 py-5 border-r border-gray-50">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 shrink-0 rounded-full bg-[#d1e9e7] flex items-center justify-center text-[#005d52] font-bold text-sm border-2 border-white">
+                      <div className="w-10 h-10 shrink-0 rounded-full bg-[#d1e9e7] flex items-center justify-center text-[#005d52] font-bold text-[13px] border-2 border-white">
                         {emp.name.split(' ').map(n => n[0]).join('')}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-gray-800">{emp.name}</p>
-                        <p className="text-[11px] font-bold text-[#005d52] uppercase tracking-tighter">{emp.id}</p>
+                        <p className="text-[13px] font-bold text-gray-800">{emp.name}</p>
+                        <p className="text-[13px] font-bold text-[#005d52] uppercase tracking-tighter">{emp.id}</p>
                       </div>
                     </div>
                   </td>
 
                   <td className="px-6 py-5 border-r border-gray-50">
-                    <span className="text-[11px] text-gray-500 font-normal">{emp.designation}</span>
+                    <span className="text-[13px] text-gray-800 font-normal">{emp.designation}</span>
                   </td>
 
                   <td className="px-6 py-5 border-r border-gray-50 font-normal">
-                    <div className="space-y-1 text-gray-400">
-                      <div className="flex items-center gap-2 text-[11px]">
+                    <div className="space-y-1 text-gray-800">
+                      <div className="flex items-center gap-2 text-[13px]">
                         <Mail size={12} className="opacity-70" /> {emp.email}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px]">
+                      <div className="flex items-center gap-2 text-[13px]">
                         <Phone size={12} className="opacity-70" /> {emp.phone}
                       </div>
                     </div>
                   </td>
 
                   <td className="px-6 py-5 border-r border-gray-50 text-center">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${emp.status === 'Active' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400 border border-gray-200'}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold uppercase tracking-tight ${emp.status === 'Active' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400 border border-gray-200'}`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${emp.status === 'Active' ? 'bg-green-600' : 'bg-gray-400'}`} />
                       {emp.status}
                     </span>
                   </td>
 
                   <td className="px-6 py-5 border-r border-gray-50">
-                    <span className="text-[11px] text-gray-400 font-normal">{emp.joinedDate}</span>
+                    <span className="text-[13px] text-gray-800 font-normal">{emp.joinedDate}</span>
                   </td>
 
-                  <td className="px-6 py-5 flex items-center text-right relative overflow-visible">
+                  <td className="px-6 py-8 flex items-center justify-between text-center relative overflow-visible">
                     <button
                     onClick={()=>navigate(`/sales/employees/view-employee/${emp.id}`)}
-                    className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
+                    className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-[#005d52] rounded-md transition-all">
                       <Eye size={14} />
                     </button>
                     <button
                      onClick={()=>navigate(`/sales/employees/edit-employee/${emp.id}`)}
-                      className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-blue-600 rounded-md transition-all">
+                      className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-blue-600 rounded-md transition-all">
                       <FileEdit size={14} />
                     </button>
                     <div className="h-px bg-gray-50 my-1" />
                     <button
                       onClick={() => handleDelete(emp.id)}
-                      className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-red-500 rounded-md transition-all"
+                      className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-red-500 rounded-md transition-all"
                     >
                       <Trash2 size={14} />
                     </button>
