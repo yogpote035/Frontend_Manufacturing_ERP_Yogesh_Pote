@@ -102,7 +102,7 @@ const DATA_STORE: Record<Exclude<TimeRange, "Custom">, any> = {
 
 const ReportsAndAnalytics: FC = () => {
   const [range, setRange] = useState<TimeRange>("Monthly");
-  const [customRange, setCustomRange] = useState({ start: "", end: "" });
+  const [customRange, setCustomRange] = useState({ start: "", end: new Date().toISOString().split("T")[0] });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -133,7 +133,7 @@ const ReportsAndAnalytics: FC = () => {
             <p className="text-sm text-gray-400 mt-1 font-normal">Advanced business intelligence insights</p>
           </div>
           <div className="flex gap-3 w-full sm:w-auto">
-            <button onClick={handleExport} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-gray-100 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-50 transition-all">
+            <button onClick={handleExport} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-[#005d52] border border-gray-200 rounded-2xl text-xs font-bold text-white hover:bg-[#005d52]/95 transition-all">
               <Download size={16} /> Export CSV
             </button>
           </div>
@@ -164,7 +164,7 @@ const ReportsAndAnalytics: FC = () => {
             {isCalendarOpen && (
               <div ref={calendarRef} className="absolute top-full mt-3 left-0 xl:left-auto xl:right-0 z-50 bg-white p-6 rounded-[2.5rem] shadow-2xl border border-gray-50 min-w-75 animate-in zoom-in-95 duration-200">
                 <div className="flex justify-between items-center mb-5">
-                  <h4 className="text-sm font-bold text-gray-800">Custom Range</h4>
+                  <h4 className="text-sm font-bold text-gray-800">Select Date Range</h4>
                   <button onClick={() => setIsCalendarOpen(false)} className="text-gray-400 hover:text-red-500"><X size={18} /></button>
                 </div>
                 <div className="space-y-4">
@@ -182,7 +182,7 @@ const ReportsAndAnalytics: FC = () => {
             )}
           </div>
 
-          <div className="bg-[#005d52] text-white px-5 py-2 rounded-full text-[11px] font-bold shadow-md">
+          <div className="bg-[#005d52] text-white px-5 py-3 rounded-2xl text-[11px] font-bold shadow-md">
             <TrendingUp size={14} className="inline mr-2" />
             {range === "Custom" ? `${customRange.start || '...'} to ${customRange.end || '...'}` : `Performance: ${range}`}
           </div>

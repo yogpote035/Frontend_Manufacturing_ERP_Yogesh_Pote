@@ -1,4 +1,4 @@
-import {
+﻿import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
@@ -29,10 +29,22 @@ import NotesPage from "./components/common/NotePage";
 import OpportunityEdit from "./components/modules/sales/components/OpportunityEdit";
 import QuotationCreate from "./components/modules/sales/components/QuotationCreate";
 import ProductionEdit from "./components/modules/sales/components/ProductionEdit";
+import EditLeadForm from "./components/modules/sales/components/EditLeadForm";
+import AddSalesEmployee from "./components/modules/sales/components/AddSalesEmployee";
+import ViewSalesEmployee from "./components/modules/sales/components/ViewSalesEmployee";
+import EditSalesEmployee from "./components/modules/sales/components/EditSalesEmployee";
 
 /* Global Suspense Wrapper */
 const withSuspense = (Component: React.ReactNode) => (
-  <Suspense fallback={<div className="text-xl text-green-400 text-center">Loading...</div>}>{Component}</Suspense>
+  <Suspense
+    fallback={
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="text-xl text-green-400">Loading...</div>
+      </div>
+    }
+  >
+    {Component}
+  </Suspense>
 );
 
 function App() {
@@ -75,16 +87,24 @@ function App() {
               element: <LeadsPage />,
             },
             {
+              path: "leads/new-lead",
+              element: <LeadForm />,
+            },
+            {
+              path: "leads/edit-lead/:id",
+              element: <EditLeadForm />,
+            },
+            {
               path: "opportunities",
               element: <OpportunitiesPage />,
             },
-                        {
-              path: "opportunity-view/:id",
+            {
+              path: "opportunities/opportunity-view/:id",
               element: <OpportunityView />,
             },
             {
-              path: "opportunity-edit/:id",
-              element: <OpportunityEdit/>
+              path: "opportunities/opportunity-edit/:id",
+              element: <OpportunityEdit />
             },
             {
               path: "quotation",
@@ -92,19 +112,19 @@ function App() {
             },
 
             {
-              path: "quotation-view/:id",
+              path: "quotation/quotation-view/:id",
               element: <QuotationView />,
             },
             {
-              path:"quotation-create",
-              element:<QuotationCreate/>
+              path: "quotation/quotation-create",
+              element: <QuotationCreate />
             },
             {
               path: "orders",
               element: <OrdersPage />,
             },
             {
-              path: "order-view/:id",
+              path: "orders/order-view/:id",
               element: <OrderView />,
             },
             {
@@ -112,14 +132,10 @@ function App() {
               element: <SalesProductionPage />,
             },
             {
-              path:"production-edit/:id",
-              element:<ProductionEdit/>
+              path: "production/production-edit/:id",
+              element: <ProductionEdit />
             },
 
-            {
-              path: "new-lead",
-              element: <LeadForm />,
-            },
 
             {
               path: "reports",
@@ -129,9 +145,21 @@ function App() {
             {
               path: "employees",
               element: <SalesEmployees />,
+            }, 
+            {
+              path: "employees/add-employee",
+              element: <AddSalesEmployee />,
+            }, 
+            {
+              path: "employees/edit-employee/:id",
+              element: <EditSalesEmployee />,
+            }, 
+            {
+              path: "employees/view-employee/:id",
+              element: <ViewSalesEmployee />,
             },
             {
-              path: "lead-view/:id",
+              path: "leads/view-lead/:id",
               element: <LeadView />,
             },
             {
@@ -150,11 +178,19 @@ function App() {
     },
   ]);
 
-  return (
-    <Suspense fallback={<div className="text-xl text-green-400 text-center">Loading App...</div>}>
-      <RouterProvider router={router} />
-    </Suspense>
-  );
+ return (
+  <Suspense
+    fallback={
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="text-xl text-green-400">
+          Loading App...
+        </div>
+      </div>
+    }
+  >
+    <RouterProvider router={router} />
+  </Suspense>
+);
 }
 
 export default App;

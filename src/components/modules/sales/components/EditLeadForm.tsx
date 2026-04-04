@@ -1,10 +1,10 @@
 ﻿import React, { useState, useMemo } from "react";
-import { 
-    ChevronRight, 
-    Building2, 
-    Package, 
-    FileText, 
-    Plus, 
+import {
+    ChevronRight,
+    Building2,
+    Package,
+    FileText,
+    Plus,
     ChevronDown,
     ArrowLeft,
     Trash2,
@@ -68,9 +68,9 @@ interface SelectProps {
     error?: string;
 }
 
-const LeadForm: React.FC = () => {
+const EditLeadForm: React.FC = () => {
     const navigate = useNavigate();
-    
+
     // --- State ---
     const [formData, setFormData] = useState<LeadFormData>({
         companyName: "",
@@ -111,7 +111,7 @@ const LeadForm: React.FC = () => {
         if (!formData.contactPerson.trim()) newErrors.contactPerson = "Contact person is required";
         if (!/^\d{10}$/.test(formData.phoneNumber)) newErrors.phoneNumber = "Valid 10-digit phone required";
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email format";
-        
+
         products.forEach((p, idx) => {
             if (!p.product) newErrors[`prod_${idx}`] = "Select product";
             if (p.quantity <= 0) newErrors[`qty_${idx}`] = "Min 1";
@@ -169,7 +169,7 @@ const LeadForm: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8 font-sans text-slate-900">
             <div className="max-w-6xl mx-auto">
-                
+
                 {/* Header & Actions */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
@@ -178,30 +178,24 @@ const LeadForm: React.FC = () => {
                                 Leads
                             </button>
                             <ChevronRight size={14} />
-                            <span className="text-slate-600">New Lead</span>
+                            <span className="text-slate-600">Edit Lead</span>
                         </div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create New Lead</h1>
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Edit Lead</h1>
                     </div>
                     <div className="flex gap-3 w-full md:w-auto">
-                        <button 
-                        onClick={()=>navigate("/sales/leads")}
+                        <button
+                            onClick={() => navigate(-1)}
                             type="button"
                             className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
                         >
                             Cancel
                         </button>
-                        <button 
-                            type="button"
-                            className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
-                        >
-                            Save Draft
-                        </button>
-                        <button 
+                        <button
                             onClick={handleSubmit}
                             disabled={isSubmitting}
                             className="flex-1 md:flex-none px-8 py-3 rounded-xl font-bold text-sm text-white bg-[#005d52] shadow-lg shadow-teal-900/20 hover:bg-[#004a41] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                         >
-                            {isSubmitting ? "Saving..." : <><Save size={18} /> Create Lead</>}
+                            {isSubmitting ? "Saving..." : <><Save size={18} /> Edit Lead</>}
                         </button>
                     </div>
                 </div>
@@ -216,9 +210,8 @@ const LeadForm: React.FC = () => {
                         ].map((item, idx) => (
                             <React.Fragment key={item.step}>
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all ${
-                                        item.active ? 'bg-[#005d52] border-[#005d52] text-white shadow-md' : 'bg-white border-slate-200 text-slate-300'
-                                    }`}>
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all ${item.active ? 'bg-[#005d52] border-[#005d52] text-white shadow-md' : 'bg-white border-slate-200 text-slate-300'
+                                        }`}>
                                         {item.step}
                                     </div>
                                     <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${item.active ? 'text-[#005d52]' : 'text-slate-400'}`}>
@@ -234,7 +227,7 @@ const LeadForm: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Section 1: Customer Info */}
                     <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                        <SectionHeader icon={<Building2 size={20}/>} title="Company Information" />
+                        <SectionHeader icon={<Building2 size={20} />} title="Company Information" />
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <FormInput label="Company Name" name="companyName" value={formData.companyName} onChange={handleInputChange} required error={errors.companyName} placeholder="e.g. Acme Corp" />
                             <FormInput label="Contact Person" name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} required error={errors.contactPerson} />
@@ -250,7 +243,7 @@ const LeadForm: React.FC = () => {
 
                     {/* Section 2: Products */}
                     <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                        <SectionHeader icon={<Package size={20}/>} title="Requirement Analysis" />
+                        <SectionHeader icon={<Package size={20} />} title="Requirement Analysis" />
                         <div className="space-y-4">
                             {products.map((item, idx) => (
                                 <div key={item.id} className="relative grid grid-cols-1 md:grid-cols-12 gap-4 p-5 bg-slate-50/50 rounded-2xl border border-slate-100 items-start hover:bg-slate-50 transition-colors">
@@ -303,7 +296,7 @@ const LeadForm: React.FC = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Logistics */}
                         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                            <SectionHeader icon={<FileText size={20}/>} title="Lead Strategy" />
+                            <SectionHeader icon={<FileText size={20} />} title="Lead Strategy" />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <FormSelect label="Priority" name="priority" value={formData.priority} onChange={handleInputChange} options={["Hot", "Warm", "Cold"]} />
                                 <FormSelect label="Status" name="initialStatus" value={formData.initialStatus} onChange={handleInputChange} options={["New Lead", "Contacted", "Awaiting Quote"]} />
@@ -314,8 +307,8 @@ const LeadForm: React.FC = () => {
 
                         {/* Address */}
                         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                            <SectionHeader icon={<MapPin size={20}/>} title="Delivery Site" />
-                            <textarea 
+                            <SectionHeader icon={<MapPin size={20} />} title="Delivery Site" />
+                            <textarea
                                 name="address"
                                 placeholder="Full factory/office address..."
                                 rows={4}
@@ -328,8 +321,8 @@ const LeadForm: React.FC = () => {
 
                     {/* Remarks */}
                     <div className="bg-[#f1f8f7] rounded-3xl p-6 border-l-8 border-[#005d52]">
-                        <SectionHeader icon={<Save size={20}/>} title="Internal Remarks" />
-                        <textarea 
+                        <SectionHeader icon={<Save size={20} />} title="Internal Remarks" />
+                        <textarea
                             name="notes"
                             placeholder="Add specific client requests or technical notes..."
                             className="w-full bg-transparent border-none text-sm text-slate-700 italic focus:ring-0 outline-none resize-none"
@@ -355,15 +348,15 @@ const SectionHeader: React.FC<{ icon: React.ReactNode; title: string }> = ({ ico
     </div>
 );
 
-const FormInput: React.FC<InputProps> = ({ 
-    label, name, value, onChange, placeholder, type = "text", required, error 
+const FormInput: React.FC<InputProps> = ({
+    label, name, value, onChange, placeholder, type = "text", required, error
 }) => (
     <div className="flex flex-col gap-1.5">
         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
             {label} {required && <span className="text-red-500">*</span>}
         </label>
         <div className="relative">
-            <input 
+            <input
                 type={type}
                 name={name}
                 value={value}
@@ -382,7 +375,7 @@ const FormSelect: React.FC<SelectProps> = ({ label, name, value, options, onChan
     <div className="flex flex-col gap-1.5">
         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{label}</label>
         <div className="relative">
-            <select 
+            <select
                 name={name}
                 value={value}
                 onChange={onChange}
@@ -396,4 +389,4 @@ const FormSelect: React.FC<SelectProps> = ({ label, name, value, options, onChan
     </div>
 );
 
-export default LeadForm;
+export default EditLeadForm;

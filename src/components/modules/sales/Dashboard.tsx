@@ -152,7 +152,7 @@ export const Dashboard = () => {
             <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Dashboard</h1>
             <p className="text-sm text-gray-400 mt-1 font-normal">Full customer pipeline overview</p>
             <div className="flex items-center gap-2 mt-4">
-              <div className="flex items-center gap-2 bg-[#005d52] text-white px-4 py-2.75 rounded-2xl text-[11px] font-bold shadow-lg shadow-teal-900/10">
+              <div className="flex items-center gap-2 bg-[#005d52] text-white px-4 py-3 rounded-2xl text-[11px] font-bold shadow-lg shadow-teal-900/10">
                 <CalendarIcon size={13} />
                 {filter === "Custom" ?
                   (customRange.start ? `${customRange.start} to ${customRange.end || '...'}` : "Custom Selection")

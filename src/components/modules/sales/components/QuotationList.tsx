@@ -126,7 +126,7 @@ const QuotationList: React.FC = () => {
                     </div>
                     <button
                         onClick={() => navigate(`/sales/quotation-create`)}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg shadow-teal-900/20 hover:scale-105 transition-transform"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20  hover:bg-[#005d52]/95 active:scale-95 transition-transform"
                     >
                         <Plus size={18} strokeWidth={3} /> New Quotation
                     </button>

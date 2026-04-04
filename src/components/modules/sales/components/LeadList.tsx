@@ -149,16 +149,15 @@ const LeadList: React.FC = () => {
                         <p className="text-sm text-gray-400 font-normal">Manage and track your customer conversions</p>
                     </div>
                     <button
-                        onClick={() => navigate("/sales/new-lead")}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg shadow-teal-900/20 hover:scale-105 transition-transform"
+                        onClick={() => navigate("/sales/leads/new-lead")}
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20 hover:scale-105 transition-transform"
                     >
                         <Plus size={18} strokeWidth={3} /> New Lead
                     </button>
                 </header>
 
                 {/* Tabs */}
-                <section className="relative mb-8 flex flex-wrap items-center gap-3">
-                    <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white/80 backdrop-blur-md rounded-2xl border border-white shadow-sm w-fit">
+<section className="relative mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">                    <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white/80 backdrop-blur-md rounded-2xl border border-white shadow-sm w-fit">
                         {(["Weekly", "Monthly", "Quarterly", "Yearly", "All Time"] as TimeTab[]).map((tab) => (
                             <button
                                 key={tab}
@@ -218,12 +217,12 @@ const LeadList: React.FC = () => {
 
                     {/* Toolbar */}
                     <div className="p-6 flex flex-col xl:flex-row justify-between items-center gap-4 bg-white border-b border-gray-50">
-                        <div className="relative w-full xl:w-96 group">
+                        <div className="relative w-full xl:w-96 group focus:shadow-2xl">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#005d52] transition-colors" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search by Lead ID or Company..."
-                                className="w-full pl-12 pr-4 py-3 bg-[#f8faf9] border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-[#005d52]/10 text-sm outline-none transition-all font-normal"
+                                className="w-full pl-12 pr-4 py-3 bg-[#F3F4F6] border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-[#005d52]/10 text-sm outline-none transition-all font-normal"
                                 value={searchQuery}
                                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                             />
@@ -313,7 +312,7 @@ const LeadList: React.FC = () => {
                                     </th>
 
                                     {/* Actions - Fixed width */}
-                                    <th className="w-28 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-right">
+                                    <th className="w-28 p-3 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center">
                                         Actions
                                     </th>
                                 </tr>
@@ -360,12 +359,15 @@ const LeadList: React.FC = () => {
 
                                         <td className="p-3">
                                             <div
-                                            onClick={()=>navigate("/sales/lead-view/id")}
-                                            className="flex gap-0.5 justify-end">
-                                                <button title="View" className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
+                                                className="flex gap-0.5 justify-end">
+                                                <button
+                                                    onClick={() => navigate("/sales/leads/view-lead/" + lead.id)}
+                                                    title="View" className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
                                                     <Eye size={15} />
                                                 </button>
-                                                <button title="Edit" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all">
+                                                <button
+                                                    onClick={() => navigate("/sales/leads/edit-lead/" + lead.id)}
+                                                    title="Edit" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all">
                                                     <FileEdit size={15} />
                                                 </button>
                                                 <button

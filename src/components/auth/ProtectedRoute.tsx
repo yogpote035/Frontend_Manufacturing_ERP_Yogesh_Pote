@@ -17,7 +17,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     setIsAllowed(!!token && role === requiredRole);
   }, [location, requiredRole]);
   console.log("Access check result:", isAllowed);
-  if (isAllowed === null) return <div>Checking access...</div>;
+  if (isAllowed === null)
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="text-xl text-green-400">Checking Access...</div>
+      </div>
+    );
 
   return isAllowed ? <Outlet /> : <Navigate to="/" replace />;
 };

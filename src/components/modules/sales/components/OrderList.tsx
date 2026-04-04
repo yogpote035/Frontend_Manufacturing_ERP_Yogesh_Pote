@@ -109,7 +109,7 @@ const OrderList: React.FC = () => {
                         <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Sales Orders</h1>
                         <p className="text-sm text-gray-400 font-normal">Manage and actively track customer orders</p>
                     </div>
-                    <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg shadow-teal-900/20 hover:scale-105 transition-transform">
+                    <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20 hover:bg-[#005d52]/95 active:scale-95 transition-transform">
                         <Plus size={18} strokeWidth={3} /> Create Order
                     </button>
                 </div>
