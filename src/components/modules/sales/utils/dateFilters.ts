@@ -1,8 +1,28 @@
-export type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time" |"Custom Range";
+export type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time" | "Custom";
 
 export type DateRange = {
   from: string;
   to: string;
+};
+
+// Helper function to parse DD-MM-YYYY format
+const parseDate = (dateStr: string): Date | null => {
+  // Check if date is in DD-MM-YYYY format
+  if (dateStr.includes('-')) {
+    const parts = dateStr.split('-');
+    if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+      // DD-MM-YYYY format
+      const [day, month, year] = parts;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+  }
+  
+  // Try standard parsing as fallback
+  const date = new Date(dateStr);
+  return !isNaN(date.getTime()) ? date : null;
 };
 
 const startOfDay = (value: Date) => {
@@ -22,6 +42,16 @@ export const formatDateForInput = (value: Date) => {
   const month = String(value.getMonth() + 1).padStart(2, "0");
   const day = String(value.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+// Optional: Format date from DD-MM-YYYY to YYYY-MM-DD for input
+export const formatDateForInputFromDMY = (dateStr: string) => {
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+    const [day, month, year] = parts;
+    return `${year}-${month}-${day}`;
+  }
+  return dateStr;
 };
 
 export const getTimeTabLabel = (tab: TimeTab, now = new Date()) => {
@@ -46,8 +76,15 @@ export const getTimeTabLabel = (tab: TimeTab, now = new Date()) => {
 };
 
 export const isDateInRange = (dateStr: string, range: TimeTab, now = new Date()) => {
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) {
+  // Handle "All Time" case first
+  if (range === "All Time") {
+    return true;
+  }
+  
+  // Parse the date string
+  const date = parseDate(dateStr);
+  if (!date) {
+    console.warn(`Invalid date string: ${dateStr}`);
     return false;
   }
 
@@ -75,8 +112,9 @@ export const isDateInRange = (dateStr: string, range: TimeTab, now = new Date())
 };
 
 export const isDateWithinCustomRange = (dateStr: string, customRange: DateRange) => {
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) {
+  const date = parseDate(dateStr);
+  if (!date) {
+    console.warn(`Invalid date string: ${dateStr}`);
     return false;
   }
 

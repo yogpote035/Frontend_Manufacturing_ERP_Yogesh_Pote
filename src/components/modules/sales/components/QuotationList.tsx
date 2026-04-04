@@ -37,14 +37,14 @@ type Quotation = {
 
 // --- Mock Data ---
 const INITIAL_QUOTATIONS: Quotation[] = [
-    { id: "QT-001", company: "Rajesh Electronics", date: "2026-03-25", validUntil: "2026-04-25", amount: "₹ 25.5L", status: "Sent", createdBy: "Rahul Patil" },
-    { id: "QT-002", company: "Modern Appliances", date: "2026-03-10", validUntil: "2026-04-10", amount: "₹ 5.5L", status: "Draft", createdBy: "Sneha P." },
-    { id: "QT-003", company: "Kitchen Hub", date: "2026-02-15", validUntil: "2026-03-15", amount: "₹ 11.2L", status: "Accepted", createdBy: "Rahul Patil" },
-    { id: "QT-004", company: "Elite Tech Solutions", date: "2026-03-19", validUntil: "2026-04-19", amount: "₹ 18.75L", status: "Draft", createdBy: "Amit S." },
-    { id: "QT-005", company: "Global Traders", date: "2026-01-05", validUntil: "2026-02-05", amount: "₹ 42.0L", status: "Expired", createdBy: "Sneha P." },
-    { id: "QT-006", company: "Oceanic Resorts", date: "2026-03-20", validUntil: "2026-04-20", amount: "₹ 14.2L", status: "Sent", createdBy: "Rahul Patil" },
-    { id: "QT-007", company: "Sunshine Schools", date: "2026-01-15", validUntil: "2026-02-15", amount: "₹ 8.1L", status: "Accepted", createdBy: "Amit S." },
-    { id: "QT-008", company: "Apex Hospitals", date: "2026-03-27", validUntil: "2026-04-27", amount: "₹ 35.8L", status: "Rejected", createdBy: "Sneha P." },
+    { id: "QT-001", company: "Rajesh Electronics", date: "25-03-2026", validUntil: "25-04-2026", amount: "₹ 25.5L", status: "Sent", createdBy: "Rahul Patil" },
+    { id: "QT-002", company: "Modern Appliances", date: "10-03-2026", validUntil: "10-04-2026", amount: "₹ 5.5L", status: "Draft", createdBy: "Sneha P." },
+    { id: "QT-003", company: "Kitchen Hub", date: "15-02-2026", validUntil: "15-03-2026", amount: "₹ 11.2L", status: "Accepted", createdBy: "Rahul Patil" },
+    { id: "QT-004", company: "Elite Tech Solutions", date: "19-03-2026", validUntil: "19-04-2026", amount: "₹ 18.75L", status: "Draft", createdBy: "Amit S." },
+    { id: "QT-005", company: "Global Traders", date: "05-01-2026", validUntil: "05-02-2026", amount: "₹ 42.0L", status: "Expired", createdBy: "Sneha P." },
+    { id: "QT-006", company: "Oceanic Resorts", date: "20-03-2026", validUntil: "20-04-2026", amount: "₹ 14.2L", status: "Sent", createdBy: "Rahul Patil" },
+    { id: "QT-007", company: "Sunshine Schools", date: "15-01-2026", validUntil: "15-02-2026", amount: "₹ 8.1L", status: "Accepted", createdBy: "Amit S." },
+    { id: "QT-008", company: "Apex Hospitals", date: "27-03-2026", validUntil: "27-04-2026", amount: "₹ 35.8L", status: "Rejected", createdBy: "Sneha P." },
 ];
 
 const QuotationList: React.FC = () => {
@@ -125,7 +125,7 @@ const QuotationList: React.FC = () => {
                         <p className="text-sm text-gray-400 font-normal">Manage and track your sales quotes</p>
                     </div>
                     <button
-                        onClick={() => navigate(`/sales/quotation-create`)}
+                        onClick={() => navigate(`/sales/quotation/quotation-create`)}
                         className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20  hover:bg-[#005d52]/95 active:scale-95 transition-transform"
                     >
                         <Plus size={18} strokeWidth={3} /> New Quotation
@@ -145,7 +145,10 @@ const QuotationList: React.FC = () => {
                             </button>
                         ))}
                         <button
-                            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                            onClick={() => {
+                                setActiveTab("Custom");
+                                setIsCalendarOpen(!isCalendarOpen);
+                            }}
                             className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                         >
                             <CalendarIcon size={14} /> Custom 
@@ -169,15 +172,25 @@ const QuotationList: React.FC = () => {
                                         className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
                                     />
                                 </div>
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
-                                    <input
-                                        type="date"
-                                        value={customDateRange.to}
-                                        onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                    />
-                                </div>
+<div className="grid gap-1">
+    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
+    <div className="relative">
+        <input
+            type="date"
+            onChange={(e) => {
+                const date = new Date(e.target.value);
+                const day = String(date.getDate()).padStart(2, "0");
+                const month = String(date.getMonth() + 1).padStart(2, "0");
+                const year = date.getFullYear();
+                
+                const formatted = `${day}-${month}-${year}`;
+                setCustomDateRange({ ...customDateRange, to: formatted });
+            }}
+            className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+        />
+    </div>
+</div>
+
                                 <button
                                     onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); setCurrentPage(1); }}
                                     className="w-full py-3 bg-[#005d52] text-white rounded-xl font-bold text-xs shadow-lg shadow-teal-900/20"
@@ -229,7 +242,7 @@ const QuotationList: React.FC = () => {
                                 )}
                             </div>
 
-                            <button onClick={() => {setQuotations(prev => prev.filter(q => !selectedIds.includes(q.id))); setSelectedIds([])}} disabled={selectedIds.length === 0} className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-20 hover:bg-red-100 transition-colors">
+                            <button onClick={() => {setQuotations(prev => prev.filter(q => !selectedIds.includes(q.id))); setSelectedIds([])}} disabled={selectedIds.length === 0} className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-40 hover:bg-red-100 transition-colors">
                                 <Trash2 size={18} />
                             </button>
                         </div>
@@ -243,25 +256,25 @@ const QuotationList: React.FC = () => {
                                     <th className="w-12 p-4 text-center border-b border-gray-100 border-r">
                                         <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.length === paginatedQuotations.length && paginatedQuotations.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r">
-                                        Quote ID
-                                    </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r">
-                                        Date Created
-                                    </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r ">
-                                        Valid Until
-                                    </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r ">
-                                        Company
-                                    </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r ">
-                                        Total Amount
-                                    </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r">
-                                        Status
-                                    </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 text-center">
+{/* Change tracking-widest to tracking-wider and add whitespace-nowrap */}
+<th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap border-b border-gray-100 border-r">
+    Quote ID
+</th>
+<th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap border-b border-gray-100 border-r">
+    Date Created
+</th>
+<th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap border-b border-gray-100 border-r">
+    Valid Until
+</th>
+<th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap border-b border-gray-100 border-r">
+    Company
+</th>
+<th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap border-b border-gray-100 border-r">
+    Total Amount
+</th>
+<th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap border-b border-gray-100 border-r">
+    Status
+</th>                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 text-center">
                                         Actions
                                     </th>
                                 </tr>
@@ -272,36 +285,36 @@ const QuotationList: React.FC = () => {
                                         <td className="p-4 text-center border-r border-gray-100">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.includes(qt.id)} onChange={() => setSelectedIds(prev => prev.includes(qt.id) ? prev.filter(i => i !== qt.id) : [...prev, qt.id])} />
                                         </td>
-                                        <td className="p-4 text-xs font-bold text-[#005d52] border-r border-gray-100">
+                                        <td className="p-4 text-[13px] font-bold text-[#005d52] border-r border-gray-100">
                                             {qt.id}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-500 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-500 border-r border-gray-100">
                                             {qt.date}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-500 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-500 border-r border-gray-100">
                                             {qt.validUntil}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
                                             {qt.company}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-800 font-bold border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
                                             {qt.amount}
                                         </td>
                                         <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full border text-[10px] font-bold ${getStatusColor(qt.status)}`}>
+                                            <span className={`px-3 py-1 rounded-full border text-[12px] font-bold ${getStatusColor(qt.status)}`}>
                                                 {qt.status}
                                             </span>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex gap-0.5 justify-center">
-                                                <button title="View" onClick={() => navigate(`/sales/quotation-view/${qt.id}`)} className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
-                                                    <Eye size={15}/>
+                                                <button title="View" onClick={() => navigate(`/sales/quotation/quotation-view/${qt.id}`)} className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
+                                                    <Eye size={18}/>
                                                 </button>
                                                 <button title="Download" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all">
-                                                    <Download size={15}/>
+                                                    <Download size={18}/>
                                                 </button>
                                                 <button title="Delete" className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => {setQuotations(prev => prev.filter(q => q.id !== qt.id))}}>
-                                                    <Trash2 size={15}/>
+                                                    <Trash2 size={18}/>
                                                 </button>
                                             </div>
                                         </td>

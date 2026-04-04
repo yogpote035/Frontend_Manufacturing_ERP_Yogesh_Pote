@@ -33,11 +33,11 @@ type ProductionJob = {
 };
 
 const INITIAL_JOBS: ProductionJob[] = [
-    { id: "PROD-1029", orderRef: "ORD-001", product: "Standard Control Panel", quantity: 15, stage: "Assembly", status: "In Progress", updatedAt: "2026-03-25" },
-    { id: "PROD-1030", orderRef: "ORD-002", product: "HVAC Unit V3", quantity: 5, stage: "Cutting", status: "Delayed", updatedAt: "2026-03-24" },
-    { id: "PROD-1031", orderRef: "ORD-003", product: "Motor Assemblies", quantity: 100, stage: "Packaging", status: "Completed", updatedAt: "2026-03-23" },
-    { id: "PROD-1032", orderRef: "ORD-006", product: "Copper Wiring Bundle", quantity: 50, stage: "Raw Materials", status: "On Hold", updatedAt: "2026-03-22" },
-    { id: "PROD-1033", orderRef: "ORD-010", product: "Industrial Generator", quantity: 2, stage: "Quality Check", status: "In Progress", updatedAt: "2026-03-25" },
+    { id: "PROD-1029", orderRef: "ORD-001", product: "Standard Control Panel", quantity: 15, stage: "Assembly", status: "In Progress", updatedAt: "25-03-2026" },
+    { id: "PROD-1030", orderRef: "ORD-002", product: "HVAC Unit V3", quantity: 5, stage: "Cutting", status: "Delayed", updatedAt: "24-03-2026" },
+    { id: "PROD-1031", orderRef: "ORD-003", product: "Motor Assemblies", quantity: 100, stage: "Packaging", status: "Completed", updatedAt: "23-03-2026" },
+    { id: "PROD-1032", orderRef: "ORD-006", product: "Copper Wiring Bundle", quantity: 50, stage: "Raw Materials", status: "On Hold", updatedAt: "22-03-2026" },
+    { id: "PROD-1033", orderRef: "ORD-010", product: "Industrial Generator", quantity: 2, stage: "Quality Check", status: "In Progress", updatedAt: "25-03-2026" },
 ];
 
 const ProductionList: React.FC = () => {
@@ -144,7 +144,12 @@ const ProductionList: React.FC = () => {
                             </button> 
                         ))}
                         <button
-                            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                            onClick={() => {
+                                setActiveTab("Custom");
+                                setIsCalendarOpen(!isCalendarOpen)}
+
+                            }
+                                
                             className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                         >
                             <CalendarIcon size={14} /> Custom 
@@ -171,15 +176,24 @@ const ProductionList: React.FC = () => {
                                         className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
                                     />
                                 </div>
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
-                                    <input
-                                        type="date"
-                                        value={customDateRange.to}
-                                        onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                    />
-                                </div>
+<div className="grid gap-1">
+    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
+    <div className="relative">
+        <input
+            type="date"
+            onChange={(e) => {
+                const date = new Date(e.target.value);
+                const day = String(date.getDate()).padStart(2, "0");
+                const month = String(date.getMonth() + 1).padStart(2, "0");
+                const year = date.getFullYear();
+                
+                const formatted = `${day}-${month}-${year}`;
+                setCustomDateRange({ ...customDateRange, to: formatted });
+            }}
+            className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+        />
+    </div>
+</div>
                                 <button
                                     onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); setCurrentPage(1); }}
                                     className="w-full py-3 bg-[#005d52] text-white rounded-xl font-bold text-xs shadow-lg shadow-teal-900/20"
@@ -207,7 +221,7 @@ const ProductionList: React.FC = () => {
                             />
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-end gap-3 w-full">
+                        <div className="flex flex-wrap items-center justify-end gap-3 w-full xl:w-auto">
                             <div className="relative">
                                 <button
                                     onClick={() => setIsStatusOpen(!isStatusOpen)}
@@ -232,7 +246,7 @@ const ProductionList: React.FC = () => {
                             <button 
                                 onClick={() => {setJobs(prev => prev.filter(j => !selectedIds.includes(j.id))); setSelectedIds([])}}
                                 disabled={selectedIds.length === 0} 
-                                className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-20 hover:bg-red-100 transition-colors"
+                                className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-40 hover:bg-red-100 transition-colors"
                             >
                                 <Trash2 size={18} />
                             </button>
@@ -247,28 +261,28 @@ const ProductionList: React.FC = () => {
                                     <th className="w-12 p-4 text-center border-b border-gray-100 border-r">
                                         <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.length === paginatedJobs.length && paginatedJobs.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
                                         Job ID
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
                                         Order Ref
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
                                         Product
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-">
                                         Qty
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
                                         Stage
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
                                         Status
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
                                         Updated
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center ">
                                         Actions
                                     </th>
                                 </tr>
@@ -279,38 +293,38 @@ const ProductionList: React.FC = () => {
                                         <td className="p-4 text-center border-r border-gray-100">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.includes(j.id)} onChange={() => toggleSelectOne(j.id)} />
                                         </td>
-                                        <td className="p-4 text-xs font-bold text-[#005d52] border-r border-gray-100">
+                                        <td className="p-4 text-[13px] font-bold text-[#005d52] border-r border-gray-100">
                                             {j.id}
                                         </td>
-                                        <td className="p-4 text-xs font-bold text-gray-600 underline cursor-pointer hover:text-[#005d52] border-r border-gray-100">
+                                        <td className="p-4 text-[13px] font-bold text-gray-600  cursor-pointer hover:text-[#3b2fe8] border-r border-gray-100">
                                             {j.orderRef}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
                                             {j.product}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-600 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-600 border-r border-gray-100">
                                             {j.quantity}
                                         </td>
                                         <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStageColor(j.stage)}`}>
+                                            <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${getStageColor(j.stage)}`}>
                                                 {j.stage}
                                             </span>
                                         </td>
                                         <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full border text-[10px] font-bold whitespace-nowrap ${getStatusColor(j.status)}`}>
+                                            <span className={`px-3 py-1 rounded-full border text-[11px] font-bold whitespace-nowrap ${getStatusColor(j.status)}`}>
                                                 {j.status}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-500 whitespace-nowrap border-r border-gray-100">
                                             {j.updatedAt}
                                         </td>
                                         <td className="p-4">
                                             <div className="flex gap-1 justify-center">
-                                                <button className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-[#005d52] rounded-md transition-all" onClick={() => navigate(`/sales/production-edit/${j.id}`)}>
-                                                    <Edit3 size={15} />
+                                                <button className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-[#005d52] rounded-md transition-all" onClick={() => navigate(`/sales/production/production-edit/${j.id}`)}>
+                                                    <Edit3 size={18} />
                                                 </button>
                                                 <button className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setJobs(prev => prev.filter(x => x.id !== j.id))}>
-                                                    <Trash2 size={15} />
+                                                    <Trash2 size={18} />
                                                 </button>
                                             </div>
                                         </td>
@@ -326,7 +340,7 @@ const ProductionList: React.FC = () => {
                             Showing <span className="text-gray-900">{paginatedJobs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredJobs.length)}</span> of <span className="text-gray-900">{filteredJobs.length}</span> Results
                         </div>
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-60 transition-colors">
                                 <ChevronLeft size={20} />
                             </button>
                             <div className="flex gap-2">
@@ -336,7 +350,7 @@ const ProductionList: React.FC = () => {
                                     </button>
                                 ))}
                             </div>
-                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-20 transition-colors">
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-60 transition-colors">
                                 <ChevronRight size={20} />
                             </button>
                         </div>

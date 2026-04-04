@@ -5,7 +5,6 @@ import {
     Trash2,
     ChevronLeft,
     ChevronRight,
-
     Calendar as CalendarIcon,
     Eye,
     FileEdit,
@@ -13,7 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
-    formatDateForInput,
+    
     isDateInRange,
     isDateWithinCustomRange,
     type DateRange,
@@ -40,9 +39,15 @@ type Opportunity = {
 };
 
 const INITIAL_OPPORTUNITIES: Opportunity[] = [
-    { id: "OP001", company: "Rajesh Electronics", contact: "Rakesh Patil", number: "9869226825", email: "rajeshelectronics@gmail.com", expectedValue: "₹ 25.5L", source: "Dealer", stage: "Proposal", priority: "High", assignedTo: "Rahul Patil", expectedCloseDate: "2026-03-31", createdAt: "2026-03-18" },
-    { id: "OP002", company: "Modern Appliances", contact: "Rohit Sharma", number: "9822334455", email: "modern@appl.com", expectedValue: "₹ 5.5L", source: "Website", stage: "Negotiation", priority: "Medium", assignedTo: "Sneha P.", expectedCloseDate: "2026-04-15", createdAt: "2026-03-10" },
-    { id: "OP003", company: "Kitchen Hub", contact: "Anjali M.", number: "9123456789", email: "hub@kitchen.com", expectedValue: "₹ 11.2L", source: "Referral", stage: "Discovery", priority: "Low", assignedTo: "Rahul Patil", expectedCloseDate: "2026-05-10", createdAt: "2026-02-15" },
+    { id: "OP001", company: "Rajesh Electronics", contact: "Rakesh Patil", number: "9869226825", email: "rajeshelectronics@gmail.com", expectedValue: "₹ 25.5L", source: "Dealer", stage: "Proposal", priority: "High", assignedTo: "Rahul Patil", expectedCloseDate: "31-03-2026", createdAt: "18-03-2026" },
+    { id: "OP002", company: "Modern Appliances", contact: "Rohit Sharma", number: "9822334455", email: "modern@appl.com", expectedValue: "₹ 5.5L", source: "Website", stage: "Negotiation", priority: "Medium", assignedTo: "Sneha P.", expectedCloseDate: "31-03-2026", createdAt: "10-03-2026" },
+    { id: "OP003", company: "Kitchen Hub", contact: "Anjali M.", number: "9123456789", email: "hub@kitchen.com", expectedValue: "₹ 11.2L", source: "Referral", stage: "Discovery", priority: "Low", assignedTo: "Rahul Patil", expectedCloseDate: "31-03-2026", createdAt: "15-02-2026" },
+    { id: "OP004", company: "Rajesh Electronics", contact: "Rakesh Patil", number: "9869226825", email: "rajeshelectronics@gmail.com", expectedValue: "₹ 25.5L", source: "Dealer", stage: "Proposal", priority: "High", assignedTo: "Rahul Patil", expectedCloseDate: "31-03-2026", createdAt: "18-03-2026" },
+    { id: "OP005", company: "Modern Appliances", contact: "Rohit Sharma", number: "9822334455", email: "modern@appl.com", expectedValue: "₹ 5.5L", source: "Website", stage: "Negotiation", priority: "Medium", assignedTo: "Sneha P.", expectedCloseDate: "31-03-2026", createdAt: "10-03-2026" },
+    { id: "OP007", company: "Rajesh Electronics", contact: "Rakesh Patil", number: "9869226825", email: "rajeshelectronics@gmail.com", expectedValue: "₹ 25.5L", source: "Dealer", stage: "Proposal", priority: "High", assignedTo: "Rahul Patil", expectedCloseDate: "31-03-2026", createdAt: "18-03-2026" },
+    { id: "OP008", company: "Modern Appliances", contact: "Rohit Sharma", number: "9822334455", email: "modern@appl.com", expectedValue: "₹ 5.5L", source: "Website", stage: "Negotiation", priority: "Medium", assignedTo: "Sneha P.", expectedCloseDate: "15-04-2026", createdAt: "10-03-2026" },
+    { id: "OP009", company: "Kitchen Hub", contact: "Anjali M.", number: "9123456789", email: "hub@kitchen.com", expectedValue: "₹ 11.2L", source: "Referral", stage: "Discovery", priority: "Low", assignedTo: "Rahul Patil", expectedCloseDate: "10-05-2026", createdAt: "15-02-2026" },
+
 ];
 
 const OpportunityList: React.FC = () => {
@@ -53,11 +58,10 @@ const OpportunityList: React.FC = () => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState<TimeTab>("All Time");
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [customDateRange, setCustomDateRange] = useState<DateRange>({
-        from: "",
-        to: formatDateForInput(new Date()),
-    });
-    
+const [customDateRange, setCustomDateRange] = useState<DateRange>({
+    from: "",
+    to: "",
+});    
     const [priorityFilter, setPriorityFilter] = useState<Priority>("All");
     const [stageFilter, setStageFilter] = useState<Stage>("All");
     const [sourceFilter, setSourceFilter] = useState<Source>("All");
@@ -129,7 +133,11 @@ const OpportunityList: React.FC = () => {
                             </button> 
                         ))}
                         <button
-                            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                            onClick={() => {
+                                setActiveTab("Custom");
+                                 setIsCalendarOpen(!isCalendarOpen)}
+
+                            }
                             className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                         >
                             <CalendarIcon size={14} /> Custom 
@@ -153,17 +161,30 @@ const OpportunityList: React.FC = () => {
                                         className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
                                     />
                                 </div>
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
-                                    <input
-                                        type="date"
-                                        value={customDateRange.to}
-                                        onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                    />
-                                </div>
+<div className="grid gap-1">
+    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
+    <div className="relative">
+        <input
+            type="date"
+            onChange={(e) => {
+                const date = new Date(e.target.value);
+                const day = String(date.getDate()).padStart(2, "0");
+                const month = String(date.getMonth() + 1).padStart(2, "0");
+                const year = date.getFullYear();
+                
+                const formatted = `${day}-${month}-${year}`;
+                setCustomDateRange({ ...customDateRange, to: formatted });
+            }}
+            className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+        />
+    </div>
+</div>
                                 <button
-                                    onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); setCurrentPage(1); }}
+                                    onClick={() => { 
+                                        setActiveTab("Custom"); 
+                                        setIsCalendarOpen(false); 
+                                        setCurrentPage(1);
+                                    }}
                                     className="w-full py-3 bg-[#005d52] text-white rounded-xl font-bold text-xs shadow-lg shadow-teal-900/20"
                                 >
                                     Apply Range
@@ -179,7 +200,7 @@ const OpportunityList: React.FC = () => {
                     {/* Toolbar */}
                     <div className="p-6 flex flex-col xl:flex-row justify-between items-center gap-4 bg-white border-b border-gray-50">
                         <div className="relative w-full xl:w-96 group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#005d52] transition-colors placeholder:text-2xl" size={18}  />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#005d52] transition-colors" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search by ID or Company"
@@ -236,25 +257,25 @@ const OpportunityList: React.FC = () => {
                                     <th className="w-12 p-4 text-center border-b border-gray-100 border-r">
                                         <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.length === paginatedOpportunities.length && paginatedOpportunities.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
                                         Opp ID
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
                                         Date Created
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
                                         Company Name
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Est. Value
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
+                                        Est  Value
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
                                         Priority
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Exp. Close Date
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
+                                        Exp Close Date
                                     </th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center">
+                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center">
                                         Actions
                                     </th>
                                 </tr>
@@ -265,20 +286,20 @@ const OpportunityList: React.FC = () => {
                                         <td className="p-4 text-center border-r border-gray-100">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.includes(opp.id)} onChange={() => setSelectedIds(prev => prev.includes(opp.id) ? prev.filter(i => i !== opp.id) : [...prev, opp.id])} />
                                         </td>
-                                        <td className="p-4 text-xs font-bold text-[#005d52] border-r border-gray-100">
+                                        <td className="p-4 text-[13px] font-bold text-[#005d52] border-r border-gray-100">
                                             {opp.id}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-500 whitespace-nowrap border-r border-gray-100">
                                             {opp.createdAt}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
                                             {opp.company}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-800 border-r border-gray-100">
+                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
                                             {opp.expectedValue}
                                         </td>
                                         <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${opp.priority === 'High' ? 'bg-red-50 text-red-600' : opp.priority === 'Medium' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
+                                            <span className={`px-3 py-1 rounded-full text-[12px] font-bold ${opp.priority === 'High' ? 'bg-red-50 text-red-600' : opp.priority === 'Medium' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
                                                 {opp.priority}
                                             </span>
                                         </td>
@@ -287,14 +308,14 @@ const OpportunityList: React.FC = () => {
                                         </td>
                                         <td className="p-4">
                                             <div className="flex gap-1 justify-center">
-                                                <button className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all" onClick={() => navigate(`/sales/opportunity-view/${opp.id}`)}>
-                                                    <Eye size={15}/>
+                                                <button className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all" onClick={() => navigate(`/sales/opportunities/opportunity-view/${opp.id}`)}>
+                                                    <Eye size={18}/>
                                                 </button>
-                                                <button className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all" onClick={() => navigate(`/sales/opportunity-edit/${opp.id}`)}>
-                                                    <FileEdit size={15}/>
+                                                <button className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all" onClick={() => navigate(`/sales/opportunities/opportunity-edit/${opp.id}`)}>
+                                                    <FileEdit size={18}/>
                                                 </button>
                                                 <button className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setOpportunities(prev => prev.filter(o => o.id !== opp.id))}>
-                                                    <Trash2 size={15}/>
+                                                    <Trash2 size={18}/>
                                                 </button>
                                             </div>
                                         </td>
