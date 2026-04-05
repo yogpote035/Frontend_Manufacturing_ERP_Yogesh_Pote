@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import {
   UserPlus,
@@ -9,45 +9,53 @@ import {
   ChevronRight,
   Eye,
   FileEdit,
-  Trash2
+  Trash2,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+// 1. Import Redux Hooks and Thunk
+import { getEmployees, clearSalesErrors } from "../ModuleStateFiles/EmployeeSlice"; // Adjust path
+import { useAppDispatch, useAppSelector } from "../../../common/ReduxMainHooks";
+import type { RootState } from "../../../../ApplicationState/Store";
 
 // --- Interfaces ---
 interface Employee {
-  id: string;
+  user_id: string;
   name: string;
   designation: string;
   email: string;
   phone: string;
-  status: "Active" | "Inactive";
-  joinedDate: string;
+  is_active: 0 | 1;
+  created_at: string;
 }
 
 const SalesEmployees: React.FC = () => {
-  // --- State ---
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const { employees, loading, error } = useAppSelector((state: RootState) => state.SalesEmployee);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"Active" | "All">("Active");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
-const navigate = useNavigate();
-  // --- Mock Data ---
-  const [employees, setEmployees] = useState<Employee[]>([
-    { id: "EMP001", name: "Sneha Patil", designation: "Senior Sales Executive", email: "sneha.p@electronics.in", phone: "+91 98234 56789", status: "Active", joinedDate: "12 Jan 2024" },
-    { id: "EMP002", name: "Rahul Deshpande", designation: "Sales Manager", email: "rahul.d@electronics.in", phone: "+91 98234 11223", status: "Active", joinedDate: "05 Mar 2023" },
-    { id: "EMP003", name: "Anjali Sharma", designation: "Territory Lead", email: "anjali.s@electronics.in", phone: "+91 98234 44556", status: "Active", joinedDate: "20 Nov 2023" },
-    { id: "EMP004", name: "Vikram Rathore", designation: "Junior Sales Associate", email: "vikram.r@electronics.in", phone: "+91 98234 99887", status: "Inactive", joinedDate: "15 Feb 2024" },
-    { id: "EMP005", name: "Priya Mehta", designation: "Sales Executive", email: "priya.m@electronics.in", phone: "+91 98234 77665", status: "Active", joinedDate: "01 Dec 2023" },
-    { id: "EMP006", name: "Karan Johar", designation: "Regional Head", email: "karan.j@electronics.in", phone: "+91 98234 22334", status: "Active", joinedDate: "10 Jan 2023" },
-  ]);
 
-  
-  // --- Filtering Logic ---
+  useEffect(() => {
+    dispatch(getEmployees());
+    return () => {
+      dispatch(clearSalesErrors());
+    };
+  }, [dispatch]);
+
+  // 4. Filtering Logic (now uses 'employees' from Redux)
   const filteredEmployees = useMemo(() => {
-    return employees.filter(emp => {
+    if (!employees) return [];
+
+    return (employees as Employee[]).filter(emp => {
       const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTab = activeTab === "All" || emp.status === "Active";
+      const matchesTab = activeTab === "All" || emp.is_active === 1;
       return matchesSearch && matchesTab;
     });
   }, [employees, searchQuery, activeTab]);
@@ -60,7 +68,8 @@ const navigate = useNavigate();
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
+      // Add your delete thunk dispatch here later
+      console.log("Delete employee:", id);
     }
   };
 
@@ -75,8 +84,8 @@ const navigate = useNavigate();
         </div>
 
         <button
-        onClick={()=>navigate("/sales/employees/add-employee")}
-        className="flex items-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20 hover:bg-[#005d52]/95 transition-all active:scale-95">
+          onClick={() => navigate("/sales/employees/add-employee")}
+          className="flex items-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20 hover:bg-[#005d52]/95 transition-all active:scale-95">
           <UserPlus size={18} strokeWidth={3} />
           Add Sales Employee
         </button>
@@ -113,8 +122,27 @@ const navigate = useNavigate();
         </div>
       </div>
 
+      {/* ERROR MESSAGE */}
+      {error && (
+        <div className="max-w-7xl mx-auto mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600">
+          <AlertCircle size={20} />
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
+
       {/* Table Container */}
-      <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-gray-100 shadow-sm overflow-visible">
+      <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-gray-100 shadow-sm overflow-visible relative">
+
+        {/* LOADING OVERLAY */}
+        {loading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-3xl">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="animate-spin text-[#005d52]" size={40} />
+              <p className="text-sm font-bold text-[#005d52] uppercase tracking-widest">Loading Employees...</p>
+            </div>
+          </div>
+        )}
+
         <div className="overflow-x-auto overflow-visible">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -129,15 +157,15 @@ const navigate = useNavigate();
             </thead>
             <tbody className="divide-y divide-gray-50">
               {paginatedData.map((emp) => (
-                <tr key={emp.id} className="hover:bg-[#f4f7f6]/50 transition-colors group">
-                  <td className="px-6 py-5 border-r border-gray-50">
+                <tr key={emp.user_id} className="hover:bg-[#f4f7f6]/50 transition-colors group">
+                  <td className="px-3 py-5 border-r border-gray-50">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 shrink-0 rounded-full bg-[#d1e9e7] flex items-center justify-center text-[#005d52] font-bold text-[13px] border-2 border-white">
-                        {emp.name.split(' ').map(n => n[0]).join('')}
+                        {emp.name ? emp.name.split(' ').map(n => n[0]).join('') : 'U'}
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-gray-800">{emp.name}</p>
-                        <p className="text-[13px] font-bold text-[#005d52] uppercase tracking-tighter">{emp.id}</p>
+                        <p className="text-[13px] font-bold text-[#005d52] uppercase tracking-tighter">{emp.user_id}</p>
                       </div>
                     </div>
                   </td>
@@ -157,31 +185,30 @@ const navigate = useNavigate();
                     </div>
                   </td>
 
-                  <td className="px-6 py-5 border-r border-gray-50 text-center">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold uppercase tracking-tight ${emp.status === 'Active' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400 border border-gray-200'}`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${emp.status === 'Active' ? 'bg-green-600' : 'bg-gray-400'}`} />
-                      {emp.status}
+                  <td className="px-4 py-5 border-r border-gray-50 text-center">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold uppercase tracking-tight ${emp.is_active === 1 ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400 border border-gray-200'}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${emp.is_active === 1 ? 'bg-green-600' : 'bg-gray-400'}`} />
+                      {emp.is_active === 1 ? 'Active' : 'Inactive'}
                     </span>
                   </td>
 
                   <td className="px-6 py-5 border-r border-gray-50">
-                    <span className="text-[13px] text-gray-800 font-normal">{emp.joinedDate}</span>
+                    <span className="text-[13px] text-gray-800 font-normal">{emp?.created_at && new Date(emp?.created_at).toLocaleDateString("en-GB").replace(/\//g, "-") || "N/A"}</span>
                   </td>
 
                   <td className="px-6 py-8 flex items-center justify-between text-center relative overflow-visible">
                     <button
-                    onClick={()=>navigate(`/sales/employees/view-employee/${emp.id}`)}
-                    className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-[#005d52] rounded-md transition-all">
+                      onClick={() => navigate(`/sales/employees/view-employee/${emp.user_id}`)}
+                      className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-[#005d52] rounded-md transition-all">
                       <Eye size={14} />
                     </button>
                     <button
-                     onClick={()=>navigate(`/sales/employees/edit-employee/${emp.id}`)}
+                      onClick={() => navigate(`/sales/employees/edit-employee/${emp.user_id}`)}
                       className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-blue-600 rounded-md transition-all">
                       <FileEdit size={14} />
                     </button>
-                    <div className="h-px bg-gray-50 my-1" />
                     <button
-                      onClick={() => handleDelete(emp.id)}
+                      onClick={() => handleDelete(emp.user_id)}
                       className="p-1.5 hover:bg-teal-50 text-gray-800 hover:text-red-500 rounded-md transition-all"
                     >
                       <Trash2 size={14} />
@@ -191,7 +218,9 @@ const navigate = useNavigate();
               ))}
             </tbody>
           </table>
-          {filteredEmployees.length === 0 && (
+
+          {/* EMPTY STATE */}
+          {!loading && filteredEmployees.length === 0 && (
             <div className="px-8 py-24 text-center">
               <Search size={40} className="mx-auto text-gray-100 mb-2" />
               <p className="text-sm text-gray-400 font-normal italic">No employees found matching your criteria.</p>

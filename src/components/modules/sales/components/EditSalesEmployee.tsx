@@ -227,7 +227,7 @@ const EditSalesEmployee: React.FC = () => {
               <SectionHeader icon={<ShieldCheck size={18} />} title="Account Control" />
               <FormSelect
                 label="Employment Status"
-                options={["Active", "On Leave", "Notice Period"]}
+                options={["Active", "Inactive"]}
                 value={formData.status}
                 onChange={(val) => setFormData({ ...formData, status: val })}
               />

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, clearErrors } from "../modules/sales/ModuleStateFiles/AuthSlice";
-import { useAppDispatch, useAppSelector } from "../modules/sales/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "../common/ReduxMainHooks";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");

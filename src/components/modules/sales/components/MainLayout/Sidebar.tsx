@@ -1,6 +1,6 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { logout } from "../../ModuleStateFiles/AuthSlice";
-import { useAppDispatch } from "../../hooks/hooks";
+import { useAppDispatch } from "../../../../common/ReduxMainHooks";
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
