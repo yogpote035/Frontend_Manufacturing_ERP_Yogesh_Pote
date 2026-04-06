@@ -106,6 +106,9 @@ export const getEmployees = () => async (dispatch: AppDispatch, getState: () => 
             title: "Loading Employees...",
             text: "Please wait while we fetch the employee data.",
             allowOutsideClick: false,
+            customClass: {
+                loader: 'lead-loader'
+            },
             didOpen: () => {
                 Swal.showLoading();
             }

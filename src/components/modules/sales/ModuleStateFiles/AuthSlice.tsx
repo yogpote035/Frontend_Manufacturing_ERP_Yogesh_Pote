@@ -106,6 +106,9 @@ export const loginUser = (payload: { email: string; password: string; }, navigat
             title: "Logging in...",
             text: "Please wait while we log you in",
             allowOutsideClick: false,
+            customClass: {
+                loader: 'lead-loader'
+            },
             didOpen: () => {
                 Swal.showLoading();
             },

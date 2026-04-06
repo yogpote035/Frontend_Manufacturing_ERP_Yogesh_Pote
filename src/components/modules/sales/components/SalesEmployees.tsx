@@ -10,7 +10,7 @@ import {
   Eye,
   FileEdit,
   Trash2,
-  Loader2,
+  
   AlertCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -134,14 +134,14 @@ const SalesEmployees: React.FC = () => {
       <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-gray-100 shadow-sm overflow-visible relative">
 
         {/* LOADING OVERLAY */}
-        {loading && (
+        {/* {loading && (
           <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-3xl">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="animate-spin text-[#005d52]" size={40} />
               <p className="text-sm font-bold text-[#005d52] uppercase tracking-widest">Loading Employees...</p>
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="overflow-x-auto overflow-visible">
           <table className="w-full text-left border-collapse">
@@ -223,7 +223,7 @@ const SalesEmployees: React.FC = () => {
           {!loading && filteredEmployees.length === 0 && (
             <div className="px-8 py-24 text-center">
               <Search size={40} className="mx-auto text-gray-100 mb-2" />
-              <p className="text-sm text-gray-400 font-normal italic">No employees found matching your criteria.</p>
+              <p className="text-sm text-gray-400 font-normal">No employees found matching your criteria.</p>
             </div>
           )}
         </div>

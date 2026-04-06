@@ -1,1 +1,6 @@
 ﻿@import "tailwindcss";
+
+
+.lead-loader {
+  border-color: #005d52 transparent #005d52 transparent !important;
+}

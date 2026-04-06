@@ -70,7 +70,7 @@ const DATA_STORE: Record<Exclude<TimeRange, "Custom">, any> = {
     products: [
       { name: "Fridge", target: 100, sold: 85, prod: 110 },
       { name: "AC", target: 80, sold: 95, prod: 90 },
-      { name: "Wash", target: 60, sold: 40, prod: 55 },
+      { name: "Washing Machine", target: 60, sold: 40, prod: 55 },
     ],
     leaderboard: [
       { name: "Sneha Patil", leads: 12, conversion: "10%", revenue: "₹2.1L" },
@@ -99,7 +99,7 @@ const DATA_STORE: Record<Exclude<TimeRange, "Custom">, any> = {
     products: [
       { name: "Fridge", target: 400, sold: 380, prod: 420 },
       { name: "AC", target: 350, sold: 410, prod: 380 },
-      { name: "Wash", target: 250, sold: 200, prod: 240 },
+      { name: "Washing Machine", target: 250, sold: 200, prod: 240 },
     ],
     leaderboard: [
       { name: "Sneha Patil", leads: 45, conversion: "12%", revenue: "₹8.4L" },
@@ -127,7 +127,7 @@ const DATA_STORE: Record<Exclude<TimeRange, "Custom">, any> = {
     products: [
       { name: "Fridge", target: 1200, sold: 1150, prod: 1300 },
       { name: "AC", target: 1000, sold: 1250, prod: 1100 },
-      { name: "Wash", target: 800, sold: 720, prod: 850 },
+      { name: "Washing Machine", target: 800, sold: 720, prod: 850 },
     ],
     leaderboard: [
       { name: "Priya Mehta", leads: 120, conversion: "20%", revenue: "₹45.2L" },
@@ -155,7 +155,7 @@ const DATA_STORE: Record<Exclude<TimeRange, "Custom">, any> = {
     products: [
       { name: "Fridge", target: 5000, sold: 4800, prod: 5200 },
       { name: "AC", target: 4500, sold: 5100, prod: 4800 },
-      { name: "Wash", target: 3500, sold: 3100, prod: 3600 },
+      { name: "Washing Machine", target: 3500, sold: 3100, prod: 3600 },
     ],
     leaderboard: [
       {
