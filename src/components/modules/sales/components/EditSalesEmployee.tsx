@@ -147,7 +147,7 @@ const EditSalesEmployee: React.FC = () => {
                 <form id="employee-form" onSubmit={handleSubmit} className="space-y-8">
 
                     {/* SECTION 1: IDENTITY */}
-                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                         <SectionHeader icon={<User size={20} />} title="Identity Information" />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -180,7 +180,7 @@ const EditSalesEmployee: React.FC = () => {
                     </div>
 
                     {/* SECTION 2: ROLE & STATUS */}
-                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                         <SectionHeader icon={<Briefcase size={20} />} title="Corporate Assignment" />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

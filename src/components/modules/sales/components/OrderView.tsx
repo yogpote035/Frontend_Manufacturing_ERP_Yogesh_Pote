@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Building2, Download, List, Truck, CheckCircle, Clock } from 'lucide-react';
+import { ChevronRight, Building2,  List, Truck, CheckCircle, Clock } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import html2pdf from 'html2pdf.js';
 
 // Define the Order type matching the OrderList
 type OrderStatus = "Pending" | "Processing" | "Delivered" | "Cancelled";
@@ -109,20 +108,6 @@ const OrderView: React.FC = () => {
         { id: '1', description: 'Advanced Manufacturing Unit V2', quantity: 1, unitPrice: 1500000 },
         { id: '2', description: 'Annual Maintenance Contract (1 Yr)', quantity: 1, unitPrice: 120000 },
     ];
-
-    const handleExport = () => {
-        const element = document.getElementById('order-pdf-content');
-        if (element && order) {
-            const opt = {
-                margin:       0.2,
-                filename:     `Order_${order.id}.pdf`,
-                image:        { type: 'jpeg' as const, quality: 0.98 },
-                html2canvas:  { scale: 1 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' as const }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-    };
 
     const formatINR = (amount: number) => {
         return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);

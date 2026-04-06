@@ -104,7 +104,7 @@ const LeadForm: React.FC = () => {
         if (!formData.lead_source) newErrors.lead_source = "Select lead source";
         if (!formData.assigned_to) newErrors.assigned_to = "Assign this lead to an employee";
 
-        productRows.forEach((row, index) => {
+        productRows.forEach((row, _index) => {
             if (!row.product_id) newErrors[`prod_${row.id}`] = "Select product";
             if (!row.variant_id) newErrors[`var_${row.id}`] = "Select variant";
             if (row.quantity <= 0) newErrors[`qty_${row.id}`] = "Qty > 0";
@@ -193,7 +193,7 @@ const LeadForm: React.FC = () => {
 
                 <div className="space-y-6">
                     {/* Section 1: Company Info */}
-                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                         <SectionTitle icon={<Building2 size={20} />} title="Customer Information" />
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <FormInput label="Company Name" name="company_name" value={formData.company_name} onChange={handleInputChange} required error={errors.company_name} placeholder="e.g. Reliance Ind." />
@@ -209,7 +209,7 @@ const LeadForm: React.FC = () => {
                     </div>
 
                     {/* Section 2: Products */}
-                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                         <SectionTitle icon={<Package size={20} />} title="Requirements & Products" />
                         <div className="space-y-4">
                             {productRows.map((row) => {
@@ -258,7 +258,7 @@ const LeadForm: React.FC = () => {
                         <div className="mt-8 bg-[#005d52] rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl shadow-teal-900/20 border border-white/10">
                             <div className="flex gap-10">
                                 <div><p className="text-[10px] uppercase font-black text-teal-200 tracking-tighter mb-1">Items Total</p><p className="text-2xl font-black">{summary.totalQty} <span className="text-sm font-medium opacity-60">Units</span></p></div>
-                                <div className="w-[1px] h-10 bg-white/10 hidden sm:block" />
+                                <div className="w-px h-10 bg-white/10 hidden sm:block" />
                                 <div><p className="text-[10px] uppercase font-black text-teal-200 tracking-tighter mb-1">Deal Value</p><p className="text-2xl font-black">₹{summary.totalValue.toLocaleString()}</p></div>
                             </div>
                             <div className="text-right hidden md:block">
@@ -269,7 +269,7 @@ const LeadForm: React.FC = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Section 3: Assignment */}
-                        <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                             <SectionTitle icon={<FileText size={20} />} title="Logistics & Ownership" />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <FormSelect
@@ -286,7 +286,7 @@ const LeadForm: React.FC = () => {
                         </div>
 
                         {/* Section 4: Location */}
-                        <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                             <SectionTitle icon={<MapPin size={20} />} title="Location Details" />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                                 <FormInput label="City" name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" />

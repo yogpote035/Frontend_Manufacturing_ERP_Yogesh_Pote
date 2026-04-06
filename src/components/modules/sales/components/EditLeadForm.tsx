@@ -223,7 +223,7 @@ const EditLead: React.FC = () => {
 
                 <div className="space-y-6">
                     {/* Section 1: Company Info */}
-                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                         <SectionTitle icon={<Building2 size={20}/>} title="Customer Information" />
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <FormInput label="Company Name" name="company_name" value={formData.company_name} onChange={handleInputChange} required error={errors.company_name} />
@@ -239,7 +239,7 @@ const EditLead: React.FC = () => {
                     </div>
 
                     {/* Section 2: Products Table */}
-                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                         <SectionTitle icon={<Package size={20}/>} title="Product Requirement" />
                         <div className="space-y-4">
                             {productRows.map((row) => {
@@ -288,7 +288,7 @@ const EditLead: React.FC = () => {
                         <div className="mt-8 bg-[#005d52] rounded-2xl p-6 text-white flex justify-between items-center shadow-xl shadow-teal-900/20">
                             <div className="flex gap-10">
                                 <div><p className="text-[10px] uppercase font-black text-teal-200 mb-1">Total Units</p><p className="text-2xl font-black">{summary.totalQty}</p></div>
-                                <div className="w-[1px] h-10 bg-white/10 hidden sm:block" />
+                                <div className="w-px h-10 bg-white/10 hidden sm:block" />
                                 <div><p className="text-[10px] uppercase font-black text-teal-200 mb-1">Total Value</p><p className="text-2xl font-black">₹{summary.totalValue.toLocaleString()}</p></div>
                             </div>
                         </div>
@@ -296,7 +296,7 @@ const EditLead: React.FC = () => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Section 3: Assignment */}
-                        <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                             <SectionTitle icon={<FileText size={20}/>} title="Logistics & Ownership" />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <FormSelect 
@@ -310,7 +310,7 @@ const EditLead: React.FC = () => {
                         </div>
 
                         {/* Section 4: Location */}
-                        <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <div className="bg-white rounded-4xl p-6 sm:p-8 border border-slate-100 shadow-sm">
                             <SectionTitle icon={<MapPin size={20}/>} title="Location Details" />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                                 <FormInput label="City" name="city" value={formData.city} onChange={handleInputChange} />
