@@ -3,6 +3,7 @@ import authReducer from "../components/modules/sales/ModuleStateFiles/AuthSlice"
 import salesEmployeeReducer from "../components/modules/sales/ModuleStateFiles/EmployeeSlice";
 import salesLeadReducer from "../components/modules/sales/ModuleStateFiles/LeadSlice";
 import dashboardReducer from "../components/modules/sales/ModuleStateFiles/DashboardSlice";
+import SalesProductReducer from "../components/modules/sales/ModuleStateFiles/ProductSlice";
 const store = configureStore({
     reducer: {
         // global Login reducer
@@ -11,6 +12,7 @@ const store = configureStore({
         SalesEmployee: salesEmployeeReducer,
         SalesLeads: salesLeadReducer,
         SalesDashboard: dashboardReducer,
+        SalesProduct: SalesProductReducer,
     },
 });
 

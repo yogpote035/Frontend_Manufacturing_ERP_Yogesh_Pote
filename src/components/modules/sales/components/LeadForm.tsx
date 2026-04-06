@@ -1,20 +1,44 @@
-﻿import React, { useState, useMemo } from "react";
-import { 
-    ChevronRight, 
-    Building2, 
-    Package, 
-    FileText, 
-    Plus, 
-    ChevronDown,
-    Trash2,
-    Save,
-    MapPin,
-    AlertCircle,
-    CheckCircle2,
+﻿import React, { useState, useMemo, useEffect } from "react";
+import {
+    ChevronRight, Building2, Package, FileText, Plus,
+    ChevronDown, Trash2, Save, MapPin, AlertCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+// Redux
+import { useAppDispatch, useAppSelector } from "../../../common/ReduxMainHooks";
+import { getProductsForLead } from "../ModuleStateFiles/ProductSlice";
+import { getEmployeesForLead } from "../ModuleStateFiles/EmployeeSlice";
+import { createLead } from "../ModuleStateFiles/LeadSlice";
+import type { RootState } from "../../../../ApplicationState/Store";
+
 // --- Interfaces ---
+interface Variant {
+    variant_id: number;
+    variant_name: string;
+    unit_price: string;
+}
+
+interface Product {
+    product_id: number;
+    product_name: string;
+    variants: Variant[];
+}
+
+interface Employee {
+    id: number;
+    name: string;
+    designation: string;
+}
+
+interface ProductRow {
+    id: number;
+    product_id: string;
+    variant_id: string;
+    quantity: number;
+    unit_price: number;
+}
+
 interface LeadFormData {
     company_name: string;
     contact_person: string;
@@ -29,87 +53,61 @@ interface LeadFormData {
     expected_close_date: string;
     followup_date: string;
     notes: string;
-    assigned_to: string | number;
+    assigned_to: number | "";
 }
 
-interface ProductItem {
-    id: number;
-    product_name: string;
-    variant: string;
-    quantity: number;
-    unit_price: number;
-}
-
-interface ValidationErrors {
+interface FormErrors {
     [key: string]: string;
-}
-
-// --- Sub-Component Props ---
-interface InputProps {
-    label: string;
-    name: string;
-    value: string | number;
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-    placeholder?: string;
-    type?: string;
-    required?: boolean;
-    error?: string;
-}
-
-interface SelectProps {
-    label: string;
-    name: string;
-    value: string | number;
-    options: { label: string; value: string | number }[];
-    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    error?: string;
 }
 
 const LeadForm: React.FC = () => {
     const navigate = useNavigate();
-    
-    // --- State ---
+    const dispatch = useAppDispatch();
+
+    // Select data from Redux
+    const { products } = useAppSelector((state: RootState) => state.SalesProduct) as { products: Product[] };
+    const { employees } = useAppSelector((state: RootState) => state.SalesEmployee) as { employees: Employee[] | null };
+
     const [formData, setFormData] = useState<LeadFormData>({
-        company_name: "",
-        contact_person: "",
-        phone: "",
-        email: "",
-        address: "",
-        city: "",
-        state: "",
-        gst_number: "",
-        lead_source: "",
-        priority: "Medium",
-        expected_close_date: "",
-        followup_date: "",
-        notes: "",
-        assigned_to: "",
+        company_name: "", contact_person: "", phone: "", email: "",
+        address: "", city: "", state: "", gst_number: "",
+        lead_source: "", priority: "Medium", expected_close_date: "",
+        followup_date: "", notes: "", assigned_to: "",
     });
 
-    const [products, setProducts] = useState<ProductItem[]>([
-        { id: Date.now(), product_name: "", variant: "", quantity: 1, unit_price: 0 }
+    const [productRows, setProductRows] = useState<ProductRow[]>([
+        { id: Date.now(), product_id: "", variant_id: "", quantity: 1, unit_price: 0 }
     ]);
 
-    const [errors, setErrors] = useState<ValidationErrors>({});
+    const [errors, setErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // --- Totals Calculation ---
+    useEffect(() => {
+        dispatch(getProductsForLead());
+        dispatch(getEmployeesForLead());
+    }, [dispatch]);
+
     const summary = useMemo(() => {
-        const qty = products.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
-        const val = products.reduce((acc, curr) => acc + ((Number(curr.quantity) || 0) * (Number(curr.unit_price) || 0)), 0);
+        const qty = productRows.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+        const val = productRows.reduce((acc, curr) => acc + ((curr.quantity || 0) * (curr.unit_price || 0)), 0);
         return { totalQty: qty, totalValue: val };
-    }, [products]);
+    }, [productRows]);
 
     // --- Validation Logic ---
     const validate = (): boolean => {
-        const newErrors: ValidationErrors = {};
+        const newErrors: FormErrors = {};
+
         if (!formData.company_name.trim()) newErrors.company_name = "Company name is required";
         if (!formData.contact_person.trim()) newErrors.contact_person = "Contact person is required";
-        if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Valid 10-digit phone required";
-        
-        products.forEach((p, idx) => {
-            if (!p.product_name) newErrors[`prod_${idx}`] = "Select product";
-            if (p.quantity <= 0) newErrors[`qty_${idx}`] = "Min 1";
+        if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Enter a valid 10-digit number";
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
+        if (!formData.lead_source) newErrors.lead_source = "Select lead source";
+        if (!formData.assigned_to) newErrors.assigned_to = "Assign this lead to an employee";
+
+        productRows.forEach((row, index) => {
+            if (!row.product_id) newErrors[`prod_${row.id}`] = "Select product";
+            if (!row.variant_id) newErrors[`var_${row.id}`] = "Select variant";
+            if (row.quantity <= 0) newErrors[`qty_${row.id}`] = "Qty > 0";
         });
 
         setErrors(newErrors);
@@ -119,260 +117,248 @@ const LeadForm: React.FC = () => {
     // --- Handlers ---
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        if (errors[name]) setErrors(prev => {
-            const temp = { ...prev };
-            delete temp[name];
-            return temp;
-        });
-    };
-
-    const handleProductChange = (id: number, field: keyof ProductItem, value: string | number) => {
-        setProducts(prev => prev.map(p => {
-            if (p.id === id) {
-                if ((field === 'quantity' || field === 'unit_price')) {
-                    const numVal = Math.max(0, Number(value));
-                    return { ...p, [field]: numVal };
-                }
-                return { ...p, [field]: value };
-            }
-            return p;
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === "assigned_to" ? (value === "" ? "" : Number(value)) : value
         }));
+        // Clear error when user types
+        if (errors[name]) {
+            const updatedErrors = { ...errors };
+            delete updatedErrors[name];
+            setErrors(updatedErrors);
+        }
     };
 
-    const addProduct = () => {
-        setProducts(prev => [...prev, { id: Date.now(), product_name: "", variant: "", quantity: 1, unit_price: 0 }]);
+    const handleProductSelect = (id: number, pId: string) => {
+        setProductRows(prev => prev.map(row =>
+            row.id === id ? { ...row, product_id: pId, variant_id: "", unit_price: 0 } : row
+        ));
+        setErrors(prev => { const n = { ...prev }; delete n[`prod_${id}`]; return n; });
     };
 
-    const removeProduct = (id: number) => {
-        if (products.length > 1) setProducts(prev => prev.filter(p => p.id !== id));
+    const handleVariantSelect = (id: number, vId: string, pId: string) => {
+        const productData = products.find(p => p.product_id === Number(pId));
+        const variantData = productData?.variants.find(v => v.variant_id === Number(vId));
+        const price = variantData ? Number(variantData.unit_price) : 0;
+
+        setProductRows(prev => prev.map(row =>
+            row.id === id ? { ...row, variant_id: vId, unit_price: price } : row
+        ));
+        setErrors(prev => { const n = { ...prev }; delete n[`var_${id}`]; return n; });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (validate()) {
-            setIsSubmitting(true);
-            
-            // Final JSON Payload Construction
-            const payload = {
-                ...formData,
-                products: products.map(({ product_name, variant, quantity, unit_price }) => ({
-                    product_name, variant, quantity, unit_price
+        if (!validate()) return;
+
+        setIsSubmitting(true);
+        const payload = {
+            ...formData,
+            products: productRows
+                .filter(p => p.product_id !== "" && p.variant_id !== "")
+                .map(p => ({
+                    product_id: p.product_id,
+                    variant_id: p.variant_id,
+                    quantity: p.quantity,
+                    unit_price: p.unit_price
                 }))
-            };
-            
-            console.log("Submitting Payload:", payload);
-                setIsSubmitting(false);
-        }
+        };
+
+        console.log("Validation Passed. Final Payload:", payload);
+        // Dispatch API Action Here
+        dispatch(createLead(payload, navigate))
     };
 
     return (
         <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8 font-sans text-slate-900">
             <div className="max-w-6xl mx-auto">
-                
-                {/* Header & Actions */}
+
+                {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
                         <div className="flex items-center gap-2 text-slate-400 mb-1 text-sm font-medium">
-                            <button onClick={() => navigate("/sales/leads")} className="hover:text-[#005d52] flex items-center gap-1 transition-colors">
-                                Leads
-                            </button>
+                            <button type="button" onClick={() => navigate("/sales/leads")} className="hover:text-[#005d52] transition-colors">Leads</button>
                             <ChevronRight size={14} />
-                            <span className="text-slate-600 font-bold tracking-tight uppercase text-[10px]">New Lead Onboarding</span>
+                            <span className="text-slate-600 font-bold uppercase text-[10px] tracking-widest">New Lead Entry</span>
                         </div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create New Lead</h1>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create Lead</h1>
                     </div>
                     <div className="flex gap-3 w-full md:w-auto">
-                        <button onClick={() => navigate("/sales/leads")} className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm text-slate-600 bg-white border border-slate-200 shadow-sm">
-                            Cancel
-                        </button>
-                        <button onClick={handleSubmit} disabled={isSubmitting} className="flex-1 md:flex-none px-8 py-3 rounded-xl font-bold text-sm text-white bg-[#005d52] shadow-lg shadow-teal-900/20 hover:bg-[#004a41] transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                        <button type="button" onClick={() => navigate("/sales/leads")} className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm bg-white border border-slate-200 hover:bg-slate-50 transition-all">Cancel</button>
+                        <button type="button" onClick={handleSubmit} disabled={isSubmitting} className="flex-1 md:flex-none px-8 py-3 rounded-xl font-bold text-sm text-white bg-[#005d52] shadow-lg shadow-teal-900/20 hover:bg-[#004a41] disabled:opacity-70 transition-all flex items-center justify-center gap-2">
                             {isSubmitting ? "Processing..." : <><Save size={18} /> Create Lead</>}
                         </button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Section 1: Customer Info */}
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                        <SectionHeader icon={<Building2 size={20}/>} title="Company Information" />
+                <div className="space-y-6">
+                    {/* Section 1: Company Info */}
+                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <SectionTitle icon={<Building2 size={20} />} title="Customer Information" />
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <FormInput label="Company Name" name="company_name" value={formData.company_name} onChange={handleInputChange} required error={errors.company_name} placeholder="Tech Solutions Pvt Ltd" />
-                            <FormInput label="Contact Person" name="contact_person" value={formData.contact_person} onChange={handleInputChange} required error={errors.contact_person} placeholder="Pooja Masne" />
-                            <FormInput label="Phone Number" name="phone" value={formData.phone} onChange={handleInputChange} required error={errors.phone} placeholder="9876543210" />
-                            <FormInput label="Email Address" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@techsolutions.com" />
-                            <FormInput label="GST Number" name="gst_number" value={formData.gst_number} onChange={handleInputChange} placeholder="27AAACA1234B1Z" />
-                            <FormSelect label="Lead Source" name="lead_source" value={formData.lead_source} onChange={handleInputChange} 
-                                options={[
-                                    {label: "Website", value: "Website"},
-                                    {label: "Trade Show", value: "Trade Show"},
-                                    {label: "Referral", value: "Referral"},
-                                    {label: "Cold Call", value: "Cold Call"}
-                                ]} 
+                            <FormInput label="Company Name" name="company_name" value={formData.company_name} onChange={handleInputChange} required error={errors.company_name} placeholder="e.g. Reliance Ind." />
+                            <FormInput label="Contact Person" name="contact_person" value={formData.contact_person} onChange={handleInputChange} required error={errors.contact_person} placeholder="Full Name" />
+                            <FormInput label="Phone Number" name="phone" value={formData.phone} onChange={handleInputChange} required error={errors.phone} placeholder="10 Digit Number" />
+                            <FormInput label="Email Address" name="email" value={formData.email} onChange={handleInputChange} error={errors.email} placeholder="mail@company.com" />
+                            <FormInput label="GST Number" name="gst_number" value={formData.gst_number} onChange={handleInputChange} placeholder="27XXXXX..." />
+                            <FormSelect
+                                label="Lead Source" name="lead_source" value={formData.lead_source} onChange={handleInputChange} required error={errors.lead_source}
+                                options={["Website", "Trade Show", "Referral", "Cold Call", "Existing Client"].map(o => ({ l: o, v: o }))}
                             />
-                            <FormInput label="City" name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" />
-                            <FormInput label="State" name="state" value={formData.state} onChange={handleInputChange} placeholder="Maharashtra" />
                         </div>
                     </div>
 
                     {/* Section 2: Products */}
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                        <SectionHeader icon={<Package size={20}/>} title="Products of Interest" />
+                    <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                        <SectionTitle icon={<Package size={20} />} title="Requirements & Products" />
                         <div className="space-y-4">
-                            {products.map((item, idx) => (
-                                <div key={item.id} className="relative grid grid-cols-1 md:grid-cols-12 gap-4 p-5 bg-slate-50/50 rounded-2xl border border-slate-100 items-start">
-                                    <div className="md:col-span-4">
-                                        <FormSelect label="Select Product" name="product_name" value={item.product_name} 
-                                            onChange={(e) => handleProductChange(item.id, 'product_name', e.target.value)} 
-                                            options={[
-                                                {label: "Double Door Refrigerator", value: "Double Door Refrigerator"},
-                                                {label: "1.5 Ton Split AC", value: "1.5 Ton Split AC"},
-                                                {label: "Front Load Washing Machine", value: "Front Load Washing Machine"},
-                                                {label: "Convection Microwave", value: "Convection Microwave"}
-                                            ]} 
-                                        />
-                                        {errors[`prod_${idx}`] && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors[`prod_${idx}`]}</p>}
+                            {productRows.map((row) => {
+                                const selectedProd = products.find(p => p.product_id === Number(row.product_id));
+                                return (
+                                    <div key={row.id} className={`grid grid-cols-1 md:grid-cols-12 gap-4 p-5 rounded-2xl border transition-all items-end ${errors[`prod_${row.id}`] || errors[`var_${row.id}`] ? 'bg-red-50/30 border-red-100' : 'bg-slate-50/50 border-slate-100'}`}>
+                                        <div className="md:col-span-4">
+                                            <FormSelect
+                                                label="Product" value={row.product_id} required
+                                                error={errors[`prod_${row.id}`]}
+                                                onChange={(e) => handleProductSelect(row.id, e.target.value)}
+                                                options={products.map(p => ({ l: p.product_name, v: String(p.product_id) }))}
+                                            />
+                                        </div>
+                                        <div className="md:col-span-3">
+                                            <FormSelect
+                                                label="Variant" value={row.variant_id} required
+                                                disabled={!row.product_id} error={errors[`var_${row.id}`]}
+                                                onChange={(e) => handleVariantSelect(row.id, e.target.value, row.product_id)}
+                                                options={selectedProd?.variants.map(v => ({ l: v.variant_name, v: String(v.variant_id) })) || []}
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <FormInput label="Qty" type="number" value={row.quantity} required error={errors[`qty_${row.id}`]} onChange={(e) => setProductRows(prev => prev.map(r => r.id === row.id ? { ...r, quantity: Number(e.target.value) } : r))} />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <div className="flex flex-col gap-1.5 px-1">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unit Price</span>
+                                                <div className="h-12 flex items-center bg-white px-4 rounded-xl border border-slate-200 text-sm font-bold text-[#005d52]">
+                                                    ₹{row.unit_price.toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="md:col-span-1 flex justify-center pb-2">
+                                            <button type="button" onClick={() => productRows.length > 1 && setProductRows(prev => prev.filter(r => r.id !== row.id))} className="p-2 text-slate-300 hover:text-red-500 transition-colors hover:bg-red-50 rounded-lg"><Trash2 size={20} /></button>
+                                        </div>
                                     </div>
-                                    <div className="md:col-span-3">
-                                        <FormInput label="Variant/Model" name="variant" value={item.variant} onChange={(e) => handleProductChange(item.id, 'variant', e.target.value)} placeholder="e.g. Inverter" />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <FormInput label="Qty" type="number" name="quantity" value={item.quantity} onChange={(e) => handleProductChange(item.id, 'quantity', e.target.value)} />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <FormInput label="Unit Price (₹)" type="number" name="unit_price" value={item.unit_price} onChange={(e) => handleProductChange(item.id, 'unit_price', e.target.value)} />
-                                    </div>
-                                    <div className="md:col-span-1 flex justify-center pt-7">
-                                        <button type="button" onClick={() => removeProduct(item.id)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                            <button type="button" onClick={addProduct} className="flex items-center gap-2 text-[#005d52] font-black text-xs uppercase tracking-widest px-4 py-2 hover:bg-teal-50 rounded-lg transition-all">
-                                <Plus size={16} strokeWidth={3} /> Add Product
+                                );
+                            })}
+                            <button type="button" onClick={() => setProductRows([...productRows, { id: Date.now(), product_id: "", variant_id: "", quantity: 1, unit_price: 0 }])} className="flex items-center gap-2 text-[#005d52] font-black text-xs uppercase tracking-widest px-4 py-2 hover:bg-teal-50 rounded-xl transition-all">
+                                <Plus size={16} strokeWidth={3} /> Add Another Item
                             </button>
                         </div>
 
-                        {/* Summary Card */}
-                        <div className="mt-8 bg-[#005d52] rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl shadow-teal-900/20">
-                            <div className="flex gap-12">
-                                <div>
-                                    <p className="text-[10px] uppercase text-teal-200 font-black tracking-widest mb-1">Total Quantity</p>
-                                    <p className="text-2xl font-black">{summary.totalQty} Units</p>
-                                </div>
-                                <div className="w-[1px] h-12 bg-white/10 hidden md:block" />
-                                <div>
-                                    <p className="text-[10px] uppercase text-teal-200 font-black tracking-widest mb-1">Est. Deal Value</p>
-                                    <p className="text-2xl font-black">₹ {summary.totalValue.toLocaleString('en-IN')}</p>
-                                </div>
+                        {/* Summary Bar */}
+                        <div className="mt-8 bg-[#005d52] rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl shadow-teal-900/20 border border-white/10">
+                            <div className="flex gap-10">
+                                <div><p className="text-[10px] uppercase font-black text-teal-200 tracking-tighter mb-1">Items Total</p><p className="text-2xl font-black">{summary.totalQty} <span className="text-sm font-medium opacity-60">Units</span></p></div>
+                                <div className="w-[1px] h-10 bg-white/10 hidden sm:block" />
+                                <div><p className="text-[10px] uppercase font-black text-teal-200 tracking-tighter mb-1">Deal Value</p><p className="text-2xl font-black">₹{summary.totalValue.toLocaleString()}</p></div>
                             </div>
-                            <p className="text-xs text-teal-100 italic opacity-80 max-w-[240px] text-right">Pricing calculated as Unit Price × Quantity per product.</p>
+                            <div className="text-right hidden md:block">
+                                <p className="text-[10px] font-medium text-teal-100 italic opacity-60">Total includes all variants and quantities selected above.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Section 3: Logistics */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                            <SectionHeader icon={<FileText size={20}/>} title="Logistics & Timeline" />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Section 3: Assignment */}
+                        <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                            <SectionTitle icon={<FileText size={20} />} title="Logistics & Ownership" />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <FormSelect label="Priority" name="priority" value={formData.priority} onChange={handleInputChange} options={[{label: "High", value: "High"}, {label: "Medium", value: "Medium"}, {label: "Low", value: "Low"}]} />
-                                <FormSelect label="Assigned Sales Rep" name="assigned_to" value={formData.assigned_to} onChange={handleInputChange} 
-                                    options={[
-                                        {label: "Rahul Sharma (Manager)", value: 2},
-                                        {label: "Sneha Patil", value: 3},
-                                        {label: "Amit Verma", value: 4}
-                                    ]} 
+                                <FormSelect
+                                    label="Assign Employee" name="assigned_to" value={formData.assigned_to} onChange={handleInputChange} required error={errors.assigned_to}
+                                    options={employees?.map(emp => ({ l: `${emp.name} (${emp.designation})`, v: emp.id })) || []}
                                 />
-                                <FormInput label="Expected Close Date" name="expected_close_date" type="date" value={formData.expected_close_date} onChange={handleInputChange} />
+                                <FormSelect label="Priority Level" name="priority" value={formData.priority} onChange={handleInputChange} options={[{ l: "High", v: "High" }, { l: "Medium", v: "Medium" }, { l: "Low", v: "Low" }]} />
                                 <FormInput label="Follow-up Date" name="followup_date" type="date" value={formData.followup_date} onChange={handleInputChange} />
+                                <FormInput label="Closing Date (Est)" name="expected_close_date" type="date" value={formData.expected_close_date} onChange={handleInputChange} />
+                            </div>
+                            <div className="mt-5">
+                                <FormInput label="Internal Notes" name="notes" value={formData.notes} onChange={handleInputChange} placeholder="Special instructions or background info..." />
                             </div>
                         </div>
 
-                        {/* Section 4: Address */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-                            <SectionHeader icon={<MapPin size={20}/>} title="Installation Address" />
-                            <textarea 
-                                name="address"
-                                placeholder="Full factory or office address..."
-                                rows={5}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-teal-500/5 focus:border-[#005d52] outline-none transition-all resize-none"
-                                value={formData.address}
-                                onChange={handleInputChange}
-                            />
+                        {/* Section 4: Location */}
+                        <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+                            <SectionTitle icon={<MapPin size={20} />} title="Location Details" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                                <FormInput label="City" name="city" value={formData.city} onChange={handleInputChange} placeholder="Mumbai" />
+                                <FormInput label="State" name="state" value={formData.state} onChange={handleInputChange} placeholder="Maharashtra" />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Full Installation Address</label>
+                                <textarea name="address" value={formData.address} onChange={handleInputChange} rows={4} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm focus:border-[#005d52] focus:ring-4 focus:ring-teal-500/5 outline-none transition-all resize-none font-bold placeholder:font-normal" placeholder="Building, Street, Area info..." />
+                            </div>
                         </div>
                     </div>
-
-                    {/* Section 5: Remarks */}
-                    <div className="bg-[#f1f8f7] rounded-3xl p-6 border-l-8 border-[#005d52]">
-                        <div className="flex items-center gap-3 mb-4">
-                             <FileText size={18} className="text-[#005d52]" />
-                             <h3 className="font-black text-xs uppercase tracking-widest text-[#005d52]">Notes & Special Requirements</h3>
-                        </div>
-                        <textarea 
-                            name="notes"
-                            placeholder="Interested in bulk purchase, tax exemptions, etc..."
-                            className="w-full bg-transparent border-none text-sm text-slate-700 italic focus:ring-0 outline-none resize-none"
-                            rows={3}
-                            value={formData.notes}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     );
 };
 
-// --- Sub-Components (Strictly Typed) ---
+// --- Atomic Components ---
 
-const SectionHeader: React.FC<{ icon: React.ReactNode; title: string }> = ({ icon, title }) => (
+const SectionTitle: React.FC<{ icon: React.ReactNode; title: string }> = ({ icon, title }) => (
     <div className="flex items-center gap-3 mb-8">
-        <div className="p-2.5 bg-teal-50 text-[#005d52] rounded-xl border border-teal-100 shadow-sm">
-            {icon}
-        </div>
+        <div className="p-2.5 bg-teal-50 text-[#005d52] rounded-xl border border-teal-100 shadow-sm">{icon}</div>
         <h3 className="font-bold text-xl text-slate-800 tracking-tight">{title}</h3>
     </div>
 );
 
-const FormInput: React.FC<InputProps> = ({ 
-    label, name, value, onChange, placeholder, type = "text", required, error 
-}) => (
+interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    label: string;
+    error?: string;
+    required?: boolean;
+}
+
+const FormInput: React.FC<InputFieldProps> = ({ label, error, required, ...props }) => (
     <div className="flex flex-col gap-1.5">
         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
             {label} {required && <span className="text-red-500">*</span>}
         </label>
-        <div className="relative">
-            <input 
-                type={type}
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                className={`w-full bg-slate-50 border ${error ? 'border-red-300 ring-4 ring-red-50' : 'border-slate-200'} rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-teal-500/5 focus:border-[#005d52] outline-none transition-all`}
+        <div className="relative group">
+            <input
+                {...props}
+                {...("type" in props && props.type === "number" ? { min: 1 } : {})}
+                className={`w-full bg-slate-50 border ${error ? 'border-red-300 ring-4 ring-red-50' : 'border-slate-200'} rounded-xl px-4 py-3 text-sm focus:border-[#005d52] focus:ring-4 focus:ring-teal-500/5 outline-none transition-all font-bold group-hover:border-slate-300 placeholder:font-normal`}
             />
-            {error && <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" size={16} />}
-            {!error && value && required && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-500" size={16} />}
+            {error && <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 animate-pulse" size={16} />}
         </div>
         {error && <p className="text-[10px] text-red-500 font-bold uppercase px-1">{error}</p>}
     </div>
 );
 
-const FormSelect: React.FC<SelectProps> = ({ label, name, value, options, onChange, error }) => (
+interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+    label: string;
+    options: { l: string; v: string | number }[];
+    error?: string;
+    required?: boolean;
+}
+
+const FormSelect: React.FC<SelectFieldProps> = ({ label, options, error, required, ...props }) => (
     <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{label}</label>
-        <div className="relative">
-            <select 
-                name={name}
-                value={value}
-                onChange={onChange}
-                className={`w-full bg-slate-50 border ${error ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-teal-500/5 focus:border-[#005d52] outline-none appearance-none cursor-pointer transition-all`}
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+            {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        <div className="relative group">
+            <select
+                {...props}
+                className={`w-full bg-slate-50 border ${error ? 'border-red-300 ring-4 ring-red-50' : 'border-slate-200'} rounded-xl px-4 py-3 text-sm appearance-none outline-none focus:border-[#005d52] focus:ring-4 focus:ring-teal-500/5 transition-all font-bold cursor-pointer group-hover:border-slate-300`}
             >
-                <option value="">Choose...</option>
-                {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                <option value="">Select option</option>
+                {options.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-slate-600 transition-colors" />
         </div>
+        {error && <p className="text-[10px] text-red-500 font-bold uppercase px-1">{error}</p>}
     </div>
 );
 

@@ -161,11 +161,7 @@ const OrderView: React.FC = () => {
                             </span>
                         </div>
                     </div>
-                    <div className="flex gap-3">
-                        <button onClick={handleExport} className="flex items-center gap-2 bg-white text-gray-600 px-5 py-2.5 rounded-full font-bold text-sm border border-gray-200 shadow-sm hover:bg-gray-50 transition-all">
-                            <Download size={18} /> Download Target
-                        </button>
-                    </div>
+                 
                 </div>
 
                 <div id="order-pdf-content" className="bg-white rounded-4xl shadow-sm border border-gray-100">

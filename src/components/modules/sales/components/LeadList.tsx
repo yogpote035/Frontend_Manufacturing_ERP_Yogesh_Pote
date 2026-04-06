@@ -13,7 +13,7 @@ import {
     Calendar as CalendarIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getLeads, clearErrors } from "../ModuleStateFiles/LeadSlice";
+import { getLeads, deleteLead, clearErrors } from "../ModuleStateFiles/LeadSlice";
 import { useAppDispatch, useAppSelector } from "../../../common/ReduxMainHooks";
 import type { RootState } from "../../../../ApplicationState/Store";
 
@@ -140,7 +140,9 @@ const LeadList: React.FC = () => {
         const date = new Date(dateStr);
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
-
+    const handleDelete = (id: number) => {
+        dispatch(deleteLead(id))
+    }
     return (
         <div className="min-h-screen bg-[#f4f7f6] p-4 md:p-8 text-gray-900 font-sans">
             <div className="max-w-7xl mx-auto">
@@ -270,6 +272,7 @@ const LeadList: React.FC = () => {
                             <button
                                 disabled={selectedIds.length === 0}
                                 className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-20"
+                                onClick={() => selectedIds.forEach(id => handleDelete(id))}
                             >
                                 <Trash2 size={18} />
                             </button>
@@ -370,7 +373,9 @@ const LeadList: React.FC = () => {
                                                     className="p-2 hover:bg-teal-50 text-gray-500 hover:text-blue-600 rounded-lg transition-all">
                                                     <FileEdit size={15} />
                                                 </button>
-                                                <button className="p-2 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-all">
+                                                <button
+                                                    onClick={() => handleDelete(lead.id)}
+                                                    className="p-2 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-all">
                                                     <Trash2 size={15} />
                                                 </button>
                                             </div>

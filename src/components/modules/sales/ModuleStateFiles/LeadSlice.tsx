@@ -2,6 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { AppDispatch, RootState } from "../../../../ApplicationState/Store";
 import Swal from "sweetalert2";
+import type { NavigateFunction } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const initialState = {
     lead: {
@@ -28,10 +30,10 @@ const initialState = {
         "assigned_to_name": "",
         "products": [
             {
-                "id": 1,
-                "lead_id": 1,
+                "id": "",
+                "lead_id": "",
                 "product_name": "",
-                "quantity": 2,
+                "quantity": "",
                 "total_price": "",
                 "product_id": "",
                 "variant": "",
@@ -80,7 +82,51 @@ const leadSlice = createSlice({
             state.loading = false;
             state.lead = action.payload?.data || action.payload;
         },
-    },
+        // EDIT LEAD
+        editLeadSuccess: (state, action) => {
+            state.loading = false;
+            state.lead = action.payload?.data || action.payload;
+        },
+        // DELETE LEAD
+        deleteLeadSuccess: (state, _action) => {
+            state.loading = false;
+            state.lead = {
+                "id": "",
+                "lead_id": "",
+                "company_name": "",
+                "contact_person": "",
+                "phone": "",
+                "email": "",
+                "city": "",
+                "status": "",
+                "priority": "",
+                "address": "",
+                "state": "",
+                "gst_number": "",
+                "lead_source": "",
+                "expected_close_date": "",
+                "followup_date": "",
+                "notes": "",
+                "assigned_to": "",
+                "created_by": "",
+                "created_at": "",
+                "updated_at": "",
+                "assigned_to_name": "",
+                "products": [
+                    {
+                        "id": "",
+                        "lead_id": "",
+                        "product_name": "",
+                        "quantity": "",
+                        "total_price": "",
+                        "product_id": "",
+                        "variant": "",
+                        "unit_price": ""
+                    }
+                ]
+            };
+        },
+    }
 });
 
 export const {
@@ -90,6 +136,8 @@ export const {
     getLeadsSuccess,
     getLeadSuccess,
     createLeadSuccess,
+    editLeadSuccess,
+    deleteLeadSuccess,
 } = leadSlice.actions;
 
 export default leadSlice.reducer;
@@ -164,7 +212,7 @@ export const getLead =
 
 
 // CREATE LEAD
-export const createLead = (payload: any) => async (dispatch: AppDispatch, getState: () => RootState) => {
+export const createLead = (payload: any, navigate: NavigateFunction) => async (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(request());
     try {
         Swal.fire({
@@ -189,10 +237,113 @@ export const createLead = (payload: any) => async (dispatch: AppDispatch, getSta
             }
         );
         dispatch(createLeadSuccess(data));
+        toast.success("Lead created successfully!");
         Swal.fire({
             icon: "success",
             iconColor: "#005d52",
             title: "Lead Created",
+            text: data.message || "Success",
+            timer: 1500,
+            showConfirmButton: false,
+        });
+        navigate("/sales/leads");
+        Swal.close();
+    } catch (error: any) {
+        Swal.close();
+        handleError(error, dispatch);
+    }
+};
+
+// EDIT LEAD
+export const editLead = (id: number, payload: any, navigate: NavigateFunction) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(request());
+    try {
+        Swal.fire({
+            title: "Updating Lead...",
+            text: "Please wait while we update the lead.",
+            allowOutsideClick: false,
+            customClass: {
+                loader: 'lead-loader'
+            },
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const token = getState().auth.token || localStorage.getItem("token");
+
+        const { data } = await axios.put(
+            `${import.meta.env.VITE_API_BASE_URL}/sales/leads/${id}`,
+            payload,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+        dispatch(editLeadSuccess(data));
+        toast.success("Lead updated successfully!");
+        Swal.fire({
+            icon: "success",
+            iconColor: "#005d52",
+            title: "Lead Created",
+            text: data.message || "Success",
+            timer: 1500,
+            showConfirmButton: false,
+        });
+        navigate("/sales/leads");
+        Swal.close();
+    } catch (error: any) {
+        Swal.close();
+        handleError(error, dispatch);
+    }
+};
+
+// Delete LEAD
+export const deleteLead = (id: number) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(request());
+    try {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) Swal.fire({
+                title: "Deleted!",
+                text: "Your file has been deleted.",
+                icon: "success"
+            });
+        });
+
+        Swal.fire({
+            title: "Deleting Lead...",
+            text: "Please wait while we delete the lead.",
+            allowOutsideClick: false,
+            customClass: {
+                loader: 'lead-loader'
+            },
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const token = getState().auth.token || localStorage.getItem("token");
+
+        const { data } = await axios.delete(
+            `${import.meta.env.VITE_API_BASE_URL}/sales/leads/${id}`,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+        dispatch(deleteLeadSuccess(data));
+        dispatch(getLeads()); // refresh list after deletion
+        toast.success("Lead deleted successfully!");
+        Swal.fire({
+            icon: "success",
+            iconColor: "#005d52",
+            title: "Lead Deleted",
             text: data.message || "Success",
             timer: 1500,
             showConfirmButton: false,
@@ -203,6 +354,7 @@ export const createLead = (payload: any) => async (dispatch: AppDispatch, getSta
         handleError(error, dispatch);
     }
 };
+
 
 // COMMON ERROR HANDLER
 const handleError = (error: any, dispatch: any) => {
@@ -241,3 +393,4 @@ const handleError = (error: any, dispatch: any) => {
 
     dispatch(failure(message));
 };
+
