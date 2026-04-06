@@ -215,7 +215,7 @@ const LeadList: React.FC = () => {
                     )}
                 </section>
                 {/* Main Table Container */}
-                <div className="bg-white rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden relative min-h-[400px]">
+                <div className="bg-white rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden relative min-h-100">
 
                     {/* Toolbar */}
                     <div className="p-4 sm:p-6 flex flex-col lg:flex-row justify-between items-center gap-4 bg-white border-b border-gray-50">
@@ -238,7 +238,7 @@ const LeadList: React.FC = () => {
                                 { label: 'Priority', value: priorityFilter, options: ["All", "High", "Medium", "Low"], setter: setPriorityFilter },
                                 { label: 'Status', value: statusFilter, options: ["All", "New", "Qualified", "Quotation", "Contacted"], setter: setStatusFilter }
                             ].map((f) => (
-                                <div key={f.label} className="relative flex-1 sm:flex-none min-w-[120px]">
+                                <div key={f.label} className="relative flex-1 sm:flex-none min-w-30">
                                     <button
                                         onClick={() => setOpenDropdown(openDropdown === f.label ? null : f.label)}
                                         className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold ${f.value !== "All"
@@ -326,11 +326,11 @@ const LeadList: React.FC = () => {
                                             {formatDate(lead.created_at)}
                                         </td>
 
-                                        <td className="px-3 py-2 text-[13px] border-r border-gray-200 truncate max-w-[160px] text-gray-800" title={lead.company_name}>
+                                        <td className="px-3 py-2 text-[13px] border-r border-gray-200 truncate max-w-40 text-gray-800" title={lead.company_name}>
                                             {lead.company_name}
                                         </td>
 
-                                        <td className="px- py-2 text-[13px] text-center border-r border-gray-200 max-w-[180px] text-gray-800">
+                                        <td className="px- py-2 text-[13px] text-center border-r border-gray-200 max-w-45 text-gray-800">
                                             {lead.products && lead.products.length > 0 ? (
                                                 lead.products.map((p, i) => (
                                                     <div key={i} className="flex justify-between border-b text-center border-gray-300 last:border-0 py-1">
