@@ -38,6 +38,7 @@ const LeadView: React.FC = () => {
     const pipelineStages = [
         { name: 'New', key: 'New' },
         { name: 'Contacted', key: 'Contacted' },
+        { name: 'Not Contacted', key: 'Not Contacted' },
         { name: 'Qualified', key: 'Qualified' },
         { name: 'Quotation', key: 'Quotation' },
         { name: 'Won', key: 'Won' },

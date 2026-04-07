@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
-    Plus,
     ChevronDown,
     Search,
     Trash2,
@@ -12,8 +11,6 @@ import {
 
     Calendar as CalendarIcon,
     MoreHorizontal,
-    TrendingUp,
-
     IndianRupee
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -161,7 +158,7 @@ const OpportunityList: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-10 text-slate-900 font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 text-slate-900 font-sans">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header */}
@@ -293,7 +290,7 @@ const OpportunityList: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex justify-center gap-2">
-                                                <button onClick={() => navigate(`/sales/opportunities/view/${op.id}`)} className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all"><Eye size={16} /></button>
+                                                <button onClick={() => navigate(`/sales/opportunities/opportunity-view/${op.id}`)} className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all"><Eye size={16} /></button>
                                                 <button onClick={() => navigate(`/sales/opportunities/edit/${op.id}`)} className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-blue-600 rounded-xl transition-all"><FileEdit size={16} /></button>
                                                 <button className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Trash2 size={16} /></button>
                                             </div>

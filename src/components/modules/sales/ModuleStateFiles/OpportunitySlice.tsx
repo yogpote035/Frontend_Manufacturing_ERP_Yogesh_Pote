@@ -6,18 +6,26 @@ import Swal from "sweetalert2";
 const initialState = {
     opportunities: [],
     opportunity: {
+        "id": "",
+        "opp_id": "",
         "lead_id": "",
         "company_name": "",
-        "contact_person": "",
-        "phone": "",
-        "email": "",
-        "value": 295000,
+        "value": "",
         "stage": "",
-        "priority": "",
-        "source": "",
-        "expected_close_date": "",
-        "assigned_to": 2,
-        "notes": ""
+        "contact_person": null,
+        "phone": null,
+        "email": null,
+        "priority": null,
+        "source": null,
+        "expected_close_date": null,
+        "assigned_to": null,
+        "created_by": null,
+        "created_by_name": null,
+        "notes": null,
+        "status": "",
+        "created_at": "",
+        "updated_at": "",
+        "assigned_to_name": null
     },
     loading: false,
     error: null,
@@ -138,6 +146,17 @@ export const getOpportunities = () => async (dispatch: AppDispatch, getState: ()
 export const getOpportunity = (id: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(getSalesOpportunityRequest());
     try {
+        Swal.fire({
+            title: "Loading Opportunity Details...",
+            text: "Please wait while we fetch the data.",
+            allowOutsideClick: false,
+            customClass: {
+                loader: 'lead-loader'
+            },
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
         const token = getState().auth.token || localStorage.getItem("token");
         console.log("Token Before get Employee Request", token);
         const { data } = await axios.get(
@@ -152,7 +171,9 @@ export const getOpportunity = (id: string) => async (dispatch: AppDispatch, getS
         // SUCCESS
         dispatch(getSalesSingleOpportunitySuccess(data));
         console.log("Opportunities data after getOpportunities:", data);
+        Swal.close();
     } catch (error: any) {
+        Swal.close();
         const status = error.response?.status;
         const message =
             error.response?.data?.message || "Something went wrong";
@@ -189,68 +210,68 @@ export const getOpportunity = (id: string) => async (dispatch: AppDispatch, getS
 };
 
 // GET OPPORTUNITY THUNK
-export const createOpportunity = (payload: any) => async (dispatch: AppDispatch, getState: () => RootState) => {
-    dispatch(getSalesOpportunityRequest());
-    Swal.fire({
-        title: 'Creating Opportunity...',
-        text: 'Please wait while we create the opportunity.',
-        allowOutsideClick: false,
-        customClass: {
-            loader: 'lead-loader'
-        },
-        didOpen: () => {
-            Swal.showLoading();
-        },
-    });
-    try {
-        const token = getState().auth.token || localStorage.getItem("token");
-        console.log("Token Before get Employee Request", token);
-        const { data } = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}/sales/opportunities/`,
-            payload,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-        console.log(" create Opportunity response data:", data);
-        // SUCCESS
-        dispatch(getSalesSingleOpportunitySuccess(data));
-        console.log("Opportunities data after create opportunity:", data);
-    } catch (error: any) {
-        const status = error.response?.status;
-        const message =
-            error.response?.data?.message || "Something went wrong";
+// export const createOpportunity = (payload: any) => async (dispatch: AppDispatch, getState: () => RootState) => {
+//     dispatch(getSalesOpportunityRequest());
+//     Swal.fire({
+//         title: 'Creating Opportunity...',
+//         text: 'Please wait while we create the opportunity.',
+//         allowOutsideClick: false,
+//         customClass: {
+//             loader: 'lead-loader'
+//         },
+//         didOpen: () => {
+//             Swal.showLoading();
+//         },
+//     });
+//     try {
+//         const token = getState().auth.token || localStorage.getItem("token");
+//         console.log("Token Before get Employee Request", token);
+//         const { data } = await axios.post(
+//             `${import.meta.env.VITE_API_BASE_URL}/sales/opportunities/`,
+//             payload,
+//             {
+//                 headers: {
+//                     Authorization: `Bearer ${token}`,
+//                 },
+//             }
+//         );
+//         console.log(" create Opportunity response data:", data);
+//         // SUCCESS
+//         dispatch(getSalesSingleOpportunitySuccess(data));
+//         console.log("Opportunities data after create opportunity:", data);
+//     } catch (error: any) {
+//         const status = error.response?.status;
+//         const message =
+//             error.response?.data?.message || "Something went wrong";
 
-        switch (status) {
-            case 400:
-                dispatch(getSalesOpportunityFailure(message || "Invalid request"));
-                break;
+//         switch (status) {
+//             case 400:
+//                 dispatch(getSalesOpportunityFailure(message || "Invalid request"));
+//                 break;
 
-            case 401: // invalid token or not logged in
-                dispatch(getSalesOpportunityFailure(message || "Please provide a valid token"));
-                break;
+//             case 401: // invalid token or not logged in
+//                 dispatch(getSalesOpportunityFailure(message || "Please provide a valid token"));
+//                 break;
 
-            case 403: // role mismatch or insufficient permissions
-                dispatch(getSalesOpportunityFailure(message || "Unauthorized access"));
-                break;
+//             case 403: // role mismatch or insufficient permissions
+//                 dispatch(getSalesOpportunityFailure(message || "Unauthorized access"));
+//                 break;
 
-            case 404:
-                dispatch(getSalesOpportunityFailure(message || "No Sales Opportunities found"));
-                break;
+//             case 404:
+//                 dispatch(getSalesOpportunityFailure(message || "No Sales Opportunities found"));
+//                 break;
 
-            case 409: //optional (not needed here)
-                dispatch(getSalesOpportunityFailure(message || "Conflict error"));
-                break;
+//             case 409: //optional (not needed here)
+//                 dispatch(getSalesOpportunityFailure(message || "Conflict error"));
+//                 break;
 
-            case 500:
-                dispatch(getSalesOpportunityFailure("Server error"));
-                break;
+//             case 500:
+//                 dispatch(getSalesOpportunityFailure("Server error"));
+//                 break;
 
-            default:
-                dispatch(getSalesOpportunityFailure(message));
-        }
-    }
-};
+//             default:
+//                 dispatch(getSalesOpportunityFailure(message));
+//         }
+//     }
+// };
 
