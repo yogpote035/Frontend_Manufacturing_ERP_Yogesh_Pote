@@ -265,7 +265,7 @@ const OpportunityList: React.FC = () => {
                                 {paginatedData.map((op) => (
                                     <tr key={op.id} className="group hover:bg-teal-50/20 transition-colors">
                                         <td className="px-6 py-5">
-                                            <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1">{op.lead_id}</p>
+                                            <p className="text-[13px] text-slate-800 uppercase tracking-wider mb-1">{op?.id}</p>
                                         </td>
                                         <td className="px-6 py-5">
                                             <p className="text-[13px] text-slate-800">{op.company_name}</p>
@@ -283,7 +283,7 @@ const OpportunityList: React.FC = () => {
                                             <span className={getPriorityStyle(op.priority)}>{op.priority}</span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2 text-[12px] text-slate-800">
+                                            <div className="text-center text-[13px] text-slate-800">
                                                 {new Date(op.expected_close_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                             </div>
                                         </td>
@@ -304,7 +304,7 @@ const OpportunityList: React.FC = () => {
                     <footer className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-6">
                           
-                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            <div className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">
                                 Showing <span className="text-slate-900">{paginatedData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to <span className="text-slate-900">{Math.min(currentPage * itemsPerPage, filteredOps.length)}</span> of <span className="text-slate-900">{filteredOps.length}</span> Opportunities
                             </div>
                         </div>

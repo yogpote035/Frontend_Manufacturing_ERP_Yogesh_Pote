@@ -60,7 +60,7 @@ const LeadList: React.FC = () => {
     // Professional Pagination States
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
-    
+
     // UI States
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -357,46 +357,29 @@ const LeadList: React.FC = () => {
 
                     {/* --- Professional Pagination Footer --- */}
                     <footer className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div className="flex items-center gap-6">
 
-                        {/* Left: Rows Per Page */}
-                        
+                            <div className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">
+                                Showing <span className="text-slate-900">{filteredLeads.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to <span className="text-slate-900">{Math.min(currentPage * itemsPerPage, filteredLeads.length)}</span> of <span className="text-slate-900">{filteredLeads.length}</span> Leads
+                            </div>
+                        </div>
 
-                        {/* Right: Smart Navigation */}
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="outline-none p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] hover:border-teal-200 disabled:opacity-30 disabled:pointer-events-none transition-all"
-                            >
-                                <ChevronLeft size={18} />
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] disabled:opacity-30 transition-all">
+                                <ChevronLeft size={18} strokeWidth={2.5} />
                             </button>
 
                             <div className="flex items-center gap-1.5">
-                                {getPageNumbers().map((page, index) => (
-                                    page === "..." ? (
-                                        <span key={`dots-${index}`} className="px-2 text-slate-300">
-                                            <MoreHorizontal size={14} />
-                                        </span>
-                                    ) : (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page as number)}
-                                            className={`outline-none min-w-10 h-10 rounded-xl text-xs font-bold transition-all duration-200 ${currentPage === page
-                                                ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20 scale-105"
-                                                : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 shadow-sm"
-                                                }`}
-                                        >
+                                {getPageNumbers().map((page, i) => (
+                                    page === "..." ? <span key={i} className="px-2 text-slate-300"><MoreHorizontal size={14} /></span> : (
+                                        <button key={i} onClick={() => setCurrentPage(page as number)} className={`min-w-10 h-10 rounded-xl text-xs font-bold transition-all ${currentPage === page ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20 scale-105" : "bg-white text-slate-500 border border-slate-200"}`}>
                                             {page}
                                         </button>
                                     )
                                 ))}
                             </div>
 
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                className="outline-none p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] hover:border-teal-200 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
-                            >
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] disabled:opacity-30 transition-all">
                                 <ChevronRight size={18} strokeWidth={2.5} />
                             </button>
                         </div>

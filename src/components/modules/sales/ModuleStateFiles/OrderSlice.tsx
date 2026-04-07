@@ -4,32 +4,27 @@ import type { AppDispatch, RootState } from "../../../../ApplicationState/Store"
 import Swal from "sweetalert2";
 
 const initialState = {
-    quotations: [],
-    quotation: {
+    orders: [],
+    order: {
         "id": "",
-        "quote_id": "",
-        "company_name": "",
-        "total": "",
-        "opportunity_id": 2,
-        "lead_id": 2,
-        "contact_person": "",
+        "order_id": "",
+        "customer_name": "",
+        "total_amount": "",
+        "quotation_id": "",
         "email": "",
         "phone": "",
-        "quotation_date": null,
-        "valid_until": "",
-        "subtotal": "",
-        "discount": "",
-        "tax": "",
-        "status": "",
+        "shipping_address": "",
         "notes": "",
-        "created_by": "",
+        "sales_rep_id": "",
+        "status": "",
+        "order_date": "",
         "created_at": "",
         "updated_at": "",
-        "created_by_name": "",
-        "products": [
+        "sales_rep_name": "",
+        "items": [
             {
                 "id": "",
-                "quotation_id": "",
+                "order_id": "",
                 "product_name": "",
                 "quantity": "",
                 "unit_price": "",
@@ -41,31 +36,58 @@ const initialState = {
     error: null,
 };
 
-const SalesQuotation = createSlice({
-    name: "SalesQuotation",
+const SalesOrder = createSlice({
+    name: "SalesOrder",
     initialState,
     reducers: {
-        getSalesQuotationRequest: (state) => {
+        getSalesOrderRequest: (state) => {
             state.loading = true;
             state.error = null;
         },
 
-        getSalesQuotationsSuccess: (state, action) => {
+        getSalesOrdersSuccess: (state, action) => {
             state.loading = false;
-            state.quotations = action.payload?.data || null;
+            state.orders = action.payload?.data || null;
             state.error = null;
         },
 
-        getSalesSingleQuotationSuccess: (state, action) => {
+        getSalesSingleOrderSuccess: (state, action) => {
             state.loading = false;
-            state.quotation = action.payload?.data || null;
+            state.order = action.payload?.data || null;
             state.error = null;
         },
 
-        getSalesQuotationFailure: (state, action) => {
+        getSalesOrderFailure: (state, action) => {
             state.loading = false;
             state.error = action.payload;
-            // state.quotation = [];
+            // state.orders = [];
+            // state.order =  {
+            //     "id": "",
+            //     "order_id": "",
+            //     "customer_name": "",
+            //     "total_amount": "",
+            //     "quotation_id": "",
+            //     "email": "",
+            //     "phone": "",
+            //     "shipping_address": "",
+            //     "notes": "",
+            //     "sales_rep_id": "",
+            //     "status": "",
+            //     "order_date": "",
+            //     "created_at": "",
+            //     "updated_at": "",
+            //     "sales_rep_name": "",
+            //     "items": [
+            //         {
+            //             "id": "",
+            //             "order_id": "",
+            //             "product_name": "",
+            //             "quantity": "",
+            //             "unit_price": "",
+            //             "total_price": ""
+            //         }
+            //     ]
+            // };
         },
 
         clearSalesErrors: (state) => {
@@ -75,21 +97,21 @@ const SalesQuotation = createSlice({
 });
 
 export const {
-    getSalesQuotationRequest,
-    getSalesQuotationsSuccess,
-    getSalesSingleQuotationSuccess,
-    getSalesQuotationFailure,
+    getSalesOrderRequest,
+    getSalesOrdersSuccess,
+    getSalesSingleOrderSuccess,
+    getSalesOrderFailure,
     clearSalesErrors,
-} = SalesQuotation.actions;
+} = SalesOrder.actions;
 
-export default SalesQuotation.reducer;
+export default SalesOrder.reducer;
 
-// GET quotation's THUNK
-export const getQuotations = () => async (dispatch: AppDispatch, getState: () => RootState) => {
-    dispatch(getSalesQuotationRequest());
+// GET order's THUNK
+export const getOrders = () => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(getSalesOrderRequest());
     try {
         Swal.fire({
-            title: "Loading Quotations...",
+            title: "Loading Orders...",
             text: "Please wait while we fetch the data.",
             allowOutsideClick: false,
             customClass: {
@@ -102,7 +124,7 @@ export const getQuotations = () => async (dispatch: AppDispatch, getState: () =>
         const token = getState().auth.token || localStorage.getItem("token");
         console.log("Token Before get Employee Request", token);
         const { data } = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/sales/quotations`,
+            `${import.meta.env.VITE_API_BASE_URL}/sales/orders`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -111,7 +133,7 @@ export const getQuotations = () => async (dispatch: AppDispatch, getState: () =>
         );
         console.log("Opportunities response data:", data);
         // SUCCESS
-        dispatch(getSalesQuotationsSuccess(data));
+        dispatch(getSalesOrdersSuccess(data));
         console.log("Opportunities data after getOpportunities:", data);
         Swal.close();
     } catch (error: any) {
@@ -123,43 +145,43 @@ export const getQuotations = () => async (dispatch: AppDispatch, getState: () =>
 
         switch (status) {
             case 400:
-                dispatch(getSalesQuotationFailure(message || "Invalid request"));
+                dispatch(getSalesOrderFailure(message || "Invalid request"));
                 break;
 
             case 401: // invalid token or not logged in
-                dispatch(getSalesQuotationFailure(message || "Please provide a valid token"));
+                dispatch(getSalesOrderFailure(message || "Please provide a valid token"));
                 break;
 
             case 403: // role mismatch or insufficient permissions
-                dispatch(getSalesQuotationFailure(message || "Unauthorized access"));
+                dispatch(getSalesOrderFailure(message || "Unauthorized access"));
                 break;
 
             case 404:
-                dispatch(getSalesQuotationFailure(message || "No Sales Opportunities found"));
+                dispatch(getSalesOrderFailure(message || "No Sales Orders found"));
                 break;
 
             case 409: //optional (not needed here)
-                dispatch(getSalesQuotationFailure(message || "Conflict error"));
+                dispatch(getSalesOrderFailure(message || "Conflict error"));
                 break;
 
             case 500:
-                dispatch(getSalesQuotationFailure("Server error"));
+                dispatch(getSalesOrderFailure("Server error"));
                 break;
 
             default:
-                dispatch(getSalesQuotationFailure(message));
+                dispatch(getSalesOrderFailure(message));
         }
     }
 };
 
-// GET OPPORTUNITY THUNK
-export const getQuotation = (id: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
-    dispatch(getSalesQuotationRequest());
+// GET ORDER THUNK
+export const getOrder = (id: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(getSalesOrderRequest());
     try {
         Swal.fire({
-            title: "Loading Quotation Details...",
+            title: "Loading Order Details...",
             text: "Please wait while we fetch the data.",
-            allowOutsideClick: false,   
+            allowOutsideClick: false,
             customClass: {
                 loader: 'lead-loader'
             },
@@ -170,7 +192,7 @@ export const getQuotation = (id: string) => async (dispatch: AppDispatch, getSta
         const token = getState().auth.token || localStorage.getItem("token");
         console.log("Token Before get Employee Request", token);
         const { data } = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/sales/quotations/${id}`,
+            `${import.meta.env.VITE_API_BASE_URL}/sales/orders/${id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -179,7 +201,7 @@ export const getQuotation = (id: string) => async (dispatch: AppDispatch, getSta
         );
         console.log("Opportunities response data:", data);
         // SUCCESS
-        dispatch(getSalesSingleQuotationSuccess(data));
+        dispatch(getSalesSingleOrderSuccess(data));
         console.log("Opportunities data after getOpportunities:", data);
         Swal.close();
     } catch (error: any) {
@@ -190,31 +212,31 @@ export const getQuotation = (id: string) => async (dispatch: AppDispatch, getSta
 
         switch (status) {
             case 400:
-                dispatch(getSalesQuotationFailure(message || "Invalid request"));
+                dispatch(getSalesOrderFailure(message || "Invalid request"));
                 break;
 
             case 401: // invalid token or not logged in
-                dispatch(getSalesQuotationFailure(message || "Please provide a valid token"));
+                dispatch(getSalesOrderFailure(message || "Please provide a valid token"));
                 break;
 
             case 403: // role mismatch or insufficient permissions
-                dispatch(getSalesQuotationFailure(message || "Unauthorized access"));
+                dispatch(getSalesOrderFailure(message || "Unauthorized access"));
                 break;
 
             case 404:
-                dispatch(getSalesQuotationFailure(message || "No Sales Opportunities found"));
+                dispatch(getSalesOrderFailure(message || "No Sales Orders found"));
                 break;
 
             case 409: //optional (not needed here)
-                dispatch(getSalesQuotationFailure(message || "Conflict error"));
+                dispatch(getSalesOrderFailure(message || "Conflict error"));
                 break;
 
             case 500:
-                dispatch(getSalesQuotationFailure("Server error"));
+                dispatch(getSalesOrderFailure("Server error"));
                 break;
 
             default:
-                dispatch(getSalesQuotationFailure(message));
+                dispatch(getSalesOrderFailure(message));
         }
     }
 };

@@ -1,57 +1,55 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
-    Plus, ChevronDown, Search, Trash2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Eye, Download, X
+    Plus, ChevronDown, Search, Trash2, ChevronLeft, ChevronRight, 
+    Calendar as CalendarIcon, Eye, Download, X, MoreHorizontal, ShoppingCart, IndianRupee
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-    formatDateForInput,
-    isDateInRange,
-    isDateWithinCustomRange,
-    type DateRange,
-    type TimeTab,
-} from "../utils/dateFilters";
+// --- Redux Imports ---
+import { getOrders, clearSalesErrors } from "../ModuleStateFiles/OrderSlice";
+import { useAppDispatch, useAppSelector } from "../../../common/ReduxMainHooks";
+import type { RootState } from "../../../../ApplicationState/Store";
 
-type TimeTabWithCustom = TimeTab | "Custom";
-
+// --- Types ---
+type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time" | "Custom";
 type Status = "Pending" | "Processing" | "Delivered" | "Cancelled" | "All";
 
-type Order = {
+interface Order {
     id: string;
-    customer: string;
-    date: string;
-    amount: string;
-    status: Exclude<Status, "All">;
-    salesRep: string;
-};
-
-const INITIAL_ORDERS: Order[] = [
-    { id: "ORD-001", customer: "Rajesh Electronics", date: "25-03-2026", amount: "₹ 25.5L", status: "Processing", salesRep: "Rahul Patil" },
-    { id: "ORD-002", customer: "Modern Appliances", date: "10-03-2026", amount: "₹ 5.5L", status: "Pending", salesRep: "Sneha P." },
-    { id: "ORD-003", customer: "Kitchen Hub", date: "15-02-2026", amount: "₹ 11.2L", status: "Delivered", salesRep: "Rahul Patil" },
-    { id: "ORD-004", customer: "Elite Tech Solutions", date: "19-03-2026", amount: "₹ 18.75L", status: "Pending", salesRep: "Amit S." },
-    { id: "ORD-005", customer: "Global Traders", date: "05-01-2026", amount: "₹ 42.0L", status: "Cancelled", salesRep: "Sneha P." },
-    { id: "ORD-006", customer: "Oceanic Resorts", date: "20-03-2026", amount: "₹ 14.2L", status: "Processing", salesRep: "Rahul Patil" },
-    { id: "ORD-007", customer: "Sunshine Schools", date: "15-01-2026", amount: "₹ 8.1L", status: "Delivered", salesRep: "Amit S." },
-];
+    order_id: string;
+    customer_name: string;
+    order_date: string;
+    total_amount: string;
+    status: string;
+    sales_rep_name: string;
+}
 
 const OrderList: React.FC = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const calendarRef = useRef<HTMLDivElement>(null);
-    const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [activeTab, setActiveTab] = useState<TimeTabWithCustom>("All Time");
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [customDateRange, setCustomDateRange] = useState<DateRange>({
-        from: "",
-        to: formatDateForInput(new Date()),
-    });
 
+    // Redux State
+    const { orders, loading } = useAppSelector((state: RootState) => state.SalesOrder);
+
+    // Filter & Search States
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [activeTab, setActiveTab] = useState<TimeTab>("All Time");
     const [statusFilter, setStatusFilter] = useState<Status>("All");
+    const [customRange, setCustomRange] = useState({ start: "", end: new Date().toISOString().split("T")[0] });
+
+    // UI States
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isStatusOpen, setIsStatusOpen] = useState(false);
 
+    // Professional Pagination States
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const itemsPerPage = 10;
+
+    useEffect(() => {
+        dispatch(getOrders());
+        return () => { dispatch(clearSalesErrors()); };
+    }, [dispatch]);
 
     // Close calendar on outside click
     useEffect(() => {
@@ -64,160 +62,163 @@ const OrderList: React.FC = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Reset pagination on filter change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, statusFilter, activeTab, itemsPerPage]);
+
+    // --- Filtering Logic ---
     const filteredOrders = useMemo(() => {
-        return orders.filter((o) => {
-            const matchesSearch = o.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                o.id.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!orders) return [];
+        return (orders as Order[]).filter((o) => {
+            const matchesSearch = o.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                o.order_id.toLowerCase().includes(searchQuery.toLowerCase());
+            
             const matchesStatus = statusFilter === "All" || o.status === statusFilter;
 
             let matchesTime = true;
+            const orderDate = new Date(o.order_date || new Date());
+            const now = new Date();
+
             if (activeTab === "Custom") {
-                matchesTime = isDateWithinCustomRange(o.date, customDateRange);
-            } else {
-                matchesTime = isDateInRange(o.date, activeTab);
+                const start = customRange.start ? new Date(customRange.start) : null;
+                const end = customRange.end ? new Date(customRange.end) : null;
+                if (start) matchesTime = matchesTime && orderDate >= start;
+                if (end) {
+                    const endOfRange = new Date(end);
+                    endOfRange.setHours(23, 59, 59);
+                    matchesTime = matchesTime && orderDate <= endOfRange;
+                }
+            } else if (activeTab !== "All Time") {
+                const diffInDays = (now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24);
+                if (activeTab === "Weekly") matchesTime = diffInDays <= 7 && diffInDays >= 0;
+                if (activeTab === "Monthly") matchesTime = orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+                if (activeTab === "Yearly") matchesTime = orderDate.getFullYear() === now.getFullYear();
             }
 
             return matchesSearch && matchesStatus && matchesTime;
         });
-    }, [orders, searchQuery, statusFilter, activeTab, customDateRange]);
+    }, [orders, searchQuery, statusFilter, activeTab, customRange]);
 
+    // --- Professional Pagination Logic ---
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
     const paginatedOrders = filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    const toggleSelectAll = () => {
-        if (selectedIds.length === paginatedOrders.length) setSelectedIds([]);
-        else setSelectedIds(paginatedOrders.map(q => q.id));
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisible = 5;
+        if (totalPages <= maxVisible) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            if (currentPage > 3) pages.push("...");
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+            for (let i = start; i <= end; i++) if (!pages.includes(i)) pages.push(i);
+            if (currentPage < totalPages - 2) pages.push("...");
+            pages.push(totalPages);
+        }
+        return pages;
     };
 
-    const getStatusColor = (st: string) => {
+    const toggleSelectAll = () => {
+        if (selectedIds.length === paginatedOrders.length) setSelectedIds([]);
+        else setSelectedIds(paginatedOrders.map(o => o.id));
+    };
+
+    const getStatusStyle = (st: string) => {
+        const base = "px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ";
         switch (st) {
-            case "Pending": return "bg-orange-50 text-orange-600 border-orange-200";
-            case "Processing": return "bg-blue-50 text-blue-600 border-blue-200";
-            case "Delivered": return "bg-green-50 text-green-600 border-green-200";
-            case "Cancelled": return "bg-red-50 text-red-600 border-red-200";
-            default: return "bg-gray-50 text-gray-600 border-gray-200";
+            case "Pending": return base + "bg-amber-50 text-amber-600 border-amber-100";
+            case "Processing": return base + "bg-blue-50 text-blue-600 border-blue-100";
+            case "Delivered": return base + "bg-emerald-50 text-emerald-600 border-emerald-100";
+            case "Cancelled": return base + "bg-rose-50 text-rose-600 border-rose-100";
+            default: return base + "bg-slate-50 text-slate-400 border-slate-100";
         }
     }
 
     return (
-        <div className="min-h-screen bg-[#f4f7f6] p-4 md:p-8 font-sans text-gray-900">
+        <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-10 font-sans text-slate-900">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Sales Orders</h1>
-                        <p className="text-sm text-gray-500 mt-1 font-medium">Manage and actively track customer orders.</p>
+                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+                            Sales Orders
+                        </h1>
+                        <p className="text-slate-500 mt-1 font-medium">Fulfillment tracking and order history management.</p>
                     </div>
-                    <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#005d52] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-teal-900/20 hover:bg-[#005d52]/95 active:scale-95 transition-transform">
+                    <button onClick={() => navigate('/sales/orders/create')} className="group flex items-center gap-2 bg-[#005d52] hover:bg-[#004a41] text-white px-6 py-3.5 rounded-2xl font-bold text-sm shadow-xl shadow-teal-900/20 transition-all active:scale-95">
                         <Plus size={18} strokeWidth={3} /> Create Order
                     </button>
                 </div>
 
-                {/* Tabs & Custom Range Button */}
+                {/* Tabs & Date Filters */}
                 <section className="relative mb-8 flex flex-wrap items-center gap-3">
-                    <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white/80 backdrop-blur-md rounded-2xl border border-white shadow-sm w-fit">
+                    <div className="flex p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
                         {(["Weekly", "Monthly", "Quarterly", "Yearly", "All Time"] as TimeTab[]).map((tab) => (
                             <button
                                 key={tab}
-                                onClick={() => { setActiveTab(tab); setCurrentPage(1); setIsCalendarOpen(false); }}
-                                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? "bg-[#005d52] text-white shadow-md" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"}`}
                             >
                                 {tab}
                             </button>
                         ))}
-                        <button
-                            onClick={() => {
-
-                                setActiveTab("Custom");
-                                setIsCalendarOpen(!isCalendarOpen)
-                            }}
-                            className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
-                        >
-                            <CalendarIcon size={14} /> Custom
-                        </button>
                     </div>
 
-                    {/* Animated Calendar Popup */}
+                    <button
+                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                        className={`px-5 py-3 text-xs font-bold rounded-2xl border transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-teal-50 border-teal-200 text-[#005d52]" : "bg-white border-slate-200 text-slate-500"}`}
+                    >
+                        <CalendarIcon size={14} /> Custom Range
+                    </button>
+
                     {isCalendarOpen && (
-                        <div ref={calendarRef} className="absolute top-full mt-2 left-0 lg:left-80 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 min-w-[320px] animate-in zoom-in-95 duration-200">
+                        <div ref={calendarRef} className="absolute top-full mt-3 left-0 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 min-w-[320px] animate-in fade-in zoom-in-95">
                             <div className="flex justify-between items-center mb-4">
-                                <h4 className="text-sm font-bold text-gray-800">Select Date Range</h4>
-                                <button onClick={() => setIsCalendarOpen(false)}><X size={18} className="text-gray-400" /></button>
+                                <h4 className="text-sm font-bold text-slate-800">Date Range</h4>
+                                <button onClick={() => setIsCalendarOpen(false)}><X size={18} className="text-slate-400" /></button>
                             </div>
-                            <div className="grid gap-4">
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Start Date</label>
-                                    <input
-                                        type="date"
-                                        value={customDateRange.from}
-                                        onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                    />
-                                </div>
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
-                                    <div className="relative">
-                                        <input
-                                            type="date"
-                                            onChange={(e) => {
-                                                const date = new Date(e.target.value);
-                                                const day = String(date.getDate()).padStart(2, "0");
-                                                const month = String(date.getMonth() + 1).padStart(2, "0");
-                                                const year = date.getFullYear();
-
-                                                const formatted = `${day}-${month}-${year}`;
-                                                setCustomDateRange({ ...customDateRange, to: formatted });
-                                            }}
-                                            className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                        />
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); setCurrentPage(1); }}
-                                    className="w-full py-3 bg-[#005d52] text-white rounded-xl font-bold text-xs shadow-lg shadow-teal-900/20"
-                                >
-                                    Apply Range
-                                </button>
+                            <div className="space-y-4">
+                                <input type="date" value={customRange.start} onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })} className="w-full p-3 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+                                <input type="date" value={customRange.end} onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })} className="w-full p-3 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+                                <button onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); }} className="w-full py-3.5 bg-[#005d52] text-white rounded-xl font-bold text-xs">Apply Selection</button>
                             </div>
                         </div>
                     )}
                 </section>
 
-                {/* Table Container */}
-                <div className="bg-white rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                {/* Main Table Container */}
+                <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
 
                     {/* Toolbar */}
-                    <div className="p-6 flex flex-col xl:flex-row justify-between items-center gap-4 border-b border-gray-50">
-                        <div className="relative w-full xl:w-96 group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#005d52] transition-colors" size={18} />
+                    <div className="p-6 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-slate-50">
+                        <div className="relative w-full lg:w-96">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search orders..."
+                                placeholder="Search by Order ID or Customer..."
                                 value={searchQuery}
-                                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                                className="w-full pl-12 pr-4 py-3 bg-[#f8faf9] border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-[#005d52]/10 text-sm outline-none transition-all"
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-teal-500/5 text-sm outline-none transition-all placeholder:text-slate-400"
                             />
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
-                            <div className="relative">
+                        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+                            <div className="relative min-w-35">
                                 <button
                                     onClick={() => setIsStatusOpen(!isStatusOpen)}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${statusFilter !== "All" ? "bg-teal-50 border-[#005d52] text-[#005d52]" : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"}`}
+                                    className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl border text-[13px] font-bold ${statusFilter !== "All" ? "bg-teal-50 border-teal-200 text-[#005d52]" : "bg-white border-slate-200 text-slate-600"}`}
                                 >
                                     {statusFilter === "All" ? "Status" : statusFilter}
                                     <ChevronDown size={14} className={isStatusOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                                 </button>
                                 {isStatusOpen && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-50 rounded-2xl shadow-2xl z-50 overflow-hidden py-1 animate-in zoom-in-95 duration-200">
+                                    <div className="absolute right-0 mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 py-2">
                                         {(["All", "Pending", "Processing", "Delivered", "Cancelled"] as Status[]).map(s => (
-                                            <button
-                                                key={s}
-                                                onClick={() => { setStatusFilter(s); setIsStatusOpen(false); setCurrentPage(1) }}
-                                                className={`w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 transition-colors ${statusFilter === s ? "text-[#005d52] font-bold" : "text-gray-600"}`}
-                                            >
+                                            <button key={s} onClick={() => { setStatusFilter(s); setIsStatusOpen(false); }} className={`w-full text-left px-4 py-2.5 text-[13px] hover:bg-slate-50 ${statusFilter === s ? "text-[#005d52] font-bold" : "text-slate-600"}`}>
                                                 {s}
                                             </button>
                                         ))}
@@ -225,103 +226,96 @@ const OrderList: React.FC = () => {
                                 )}
                             </div>
 
-                            <button onClick={() => { setOrders(prev => prev.filter(o => !selectedIds.includes(o.id))); setSelectedIds([]) }} disabled={selectedIds.length === 0} className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-40 hover:bg-red-100 transition-colors">
-                                <Trash2 size={18} />
+                            <button disabled={selectedIds.length === 0} className="p-3 bg-rose-50 text-rose-500 rounded-xl disabled:opacity-20 transition-colors">
+                                <Trash2 size={20} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Table with Vertical Lines */}
+                    {/* Table Area */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-gray-50/50">
-                                    <th className="w-12 p-4 text-center border-b border-gray-100 border-r">
+                                <tr className="bg-slate-50/50">
+                                    <th className="w-16 p-5 text-center border-b border-r border-slate-100">
                                         <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.length === paginatedOrders.length && paginatedOrders.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r">
-                                        Order ID
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r">
-                                        Order Date
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r ">
-                                        Customer
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r ">
-                                        Total Amount
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 border-r ">
-                                        Status
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-widest border-b border-gray-100 text-center">
-                                        Actions
-                                    </th>
+                                    <th className="px-4 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100 text-center">Reference ID</th>
+                                    <th className="px-4 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Order Date</th>
+                                    <th className="px-4 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Customer Name</th>
+                                    <th className="px-4 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100 text-center">Grand Total</th>
+                                    <th className="px-4 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100 text-center">Status</th>
+                                    <th className="px-4 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-slate-50">
                                 {paginatedOrders.map((o) => (
-                                    <tr key={o.id} className="hover:bg-[#f8faf9]/80 transition-colors group">
-                                        <td className="p-4 text-center border-r border-gray-100">
+                                    <tr key={o.id} className="group hover:bg-teal-50/20 transition-colors">
+                                        <td className="p-5 text-center border-r border-slate-50">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.includes(o.id)} onChange={() => setSelectedIds(prev => prev.includes(o.id) ? prev.filter(i => i !== o.id) : [...prev, o.id])} />
                                         </td>
-                                        <td className="p-4 text-[13px] font-bold text-[#005d52] border-r border-gray-100">
-                                            {o.id}
+                                        <td className="px-4 py-5 text-[13px] font-bold text-[#005d52] border-r border-slate-50 text-center">{o.order_id}</td>
+                                        <td className="px-4 py-5 text-[13px] text-slate-500 whitespace-nowrap border-r border-slate-50 font-medium">
+                                            {new Date(o.order_date).toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'})}
                                         </td>
-                                        <td className="p-4 text-[13px] text-gray-500 whitespace-nowrap border-r border-gray-100">
-                                            {o.date}
+                                        <td className="px-4 py-5 text-[13px] font-bold text-slate-700 border-r border-slate-50">{o.customer_name}</td>
+                                        <td className="px-4 py-5 text-[14px] font-black text-slate-800 border-r border-slate-50 text-center">
+                                           <div className="flex items-center justify-center gap-1">
+                                                <IndianRupee size={12} className="text-slate-400"/>
+                                                {Number(o.total_amount).toLocaleString('en-IN')}
+                                           </div>
                                         </td>
-                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
-                                            {o.customer}
+                                        <td className="px-4 py-5 border-r border-slate-50 text-center">
+                                            <span className={getStatusStyle(o.status)}>{o.status}</span>
                                         </td>
-                                        <td className="p-4 text-[13px] text-gray-800  border-r border-gray-100">
-                                            {o.amount}
-                                        </td>
-                                        <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full border text-[10px] font-bold whitespace-nowrap ${getStatusColor(o.status)}`}>
-                                                {o.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-0.5 justify-center">
-                                                <button title="View" onClick={() => navigate(`/sales/orders/order-view/${o.id}`)} className="p-1.5 hover:bg-teal-50 text-gray-400 hover:text-[#005d52] rounded-md transition-all">
-                                                    <Eye size={18} />
-                                                </button>
-                                                <button title="Download" className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-md transition-all">
-                                                    <Download size={18} />
-                                                </button>
-                                                <button title="Delete" className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setOrders(prev => prev.filter(x => x.id !== o.id))}>
-                                                    <Trash2 size={18} />
-                                                </button>
+                                        <td className="px-4 py-5">
+                                            <div className="flex justify-center gap-1">
+                                                <button title="View" onClick={() => navigate(`/sales/orders/order-view/${o.id}`)} className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all"><Eye size={16} /></button>
+                                                <button title="Download" className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-blue-600 rounded-xl transition-all"><Download size={16} /></button>
+                                                <button title="Delete" className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                        {paginatedOrders.length === 0 && (
-                            <div className="py-20 text-center text-gray-400 italic text-sm">No orders found.</div>
+                        {!loading && filteredOrders.length === 0 && (
+                            <div className="py-32 flex flex-col items-center justify-center text-center">
+                                <div className="p-6 bg-slate-50 rounded-full mb-4">
+                                    <ShoppingCart className="text-slate-200" size={40} />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-800">No Orders Found</h3>
+                                <p className="text-slate-400 text-sm max-w-xs">We couldn't find any orders matching your criteria.</p>
+                            </div>
                         )}
                     </div>
 
-                    {/* Pagination */}
-                    <footer className="p-6 bg-gray-50/30 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            Showing <span className="text-gray-900">{paginatedOrders.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredOrders.length)}</span> of <span className="text-gray-900">{filteredOrders.length}</span> Results
+                    {/* --- Professional Pagination Footer --- */}
+                    <footer className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div className="flex items-center gap-6">
+                           
+                            <div className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">
+                                Showing <span className="text-slate-900">{paginatedOrders.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredOrders.length)}</span> of <span className="text-slate-900">{filteredOrders.length}</span> Results
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-60 transition-colors">
-                                <ChevronLeft size={20} />
+
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] disabled:opacity-30 transition-all shadow-sm">
+                                <ChevronLeft size={18} strokeWidth={2.5} />
                             </button>
-                            <div className="flex gap-2">
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${currentPage === i + 1 ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20" : "text-gray-400 hover:bg-gray-100"}`}>
-                                        {i + 1}
-                                    </button>
+
+                            <div className="flex items-center gap-1.5">
+                                {getPageNumbers().map((page, i) => (
+                                    page === "..." ? <span key={i} className="px-2 text-slate-300"><MoreHorizontal size={14} /></span> : (
+                                        <button key={i} onClick={() => setCurrentPage(page as number)} className={`min-w-10 h-10 rounded-xl text-xs font-bold transition-all ${currentPage === page ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20 scale-105" : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 shadow-sm"}`}>
+                                            {page}
+                                        </button>
+                                    )
                                 ))}
                             </div>
-                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-60 transition-colors">
-                                <ChevronRight size={20} />
+
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] disabled:opacity-30 transition-all shadow-sm">
+                                <ChevronRight size={18} strokeWidth={2.5} />
                             </button>
                         </div>
                     </footer>

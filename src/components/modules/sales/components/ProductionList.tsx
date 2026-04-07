@@ -8,59 +8,62 @@ import {
     Calendar as CalendarIcon,
     Edit3,
     X,
+    MoreHorizontal,
+    Settings,
+    Factory
 } from "lucide-react";
-import {
-    formatDateForInput,
-    isDateInRange,
-    isDateWithinCustomRange,
-    type DateRange,
-    type TimeTab,
-} from "../utils/dateFilters";
 import { useNavigate } from "react-router-dom";
+// --- Redux Imports ---
+import { getProductions, clearSalesErrors } from "../ModuleStateFiles/ProductionSlice";
+import { useAppDispatch, useAppSelector } from "../../../common/ReduxMainHooks";
+import type { RootState } from "../../../../ApplicationState/Store";
 
 // --- Types ---
 type ProdStatus = "In Progress" | "On Hold" | "Completed" | "Delayed" | "All";
-type Stage = "Raw Materials" | "Cutting" | "Assembly" | "Quality Check" | "Packaging";
+type TimeTab = "Weekly" | "Monthly" | "Quarterly" | "Yearly" | "All Time" | "Custom";
 
-type ProductionJob = {
-    id: string;
-    orderRef: string;
-    product: string;
+interface ProductionJob {
+    id: number;
+    job_id: string;
+    product_name: string;
+    status: string;
+    order_id: string;
     quantity: number;
-    stage: Stage;
-    status: Exclude<ProdStatus, "All">;
-    updatedAt: string;
-};
-
-const INITIAL_JOBS: ProductionJob[] = [
-    { id: "PROD-1029", orderRef: "ORD-001", product: "Standard Control Panel", quantity: 15, stage: "Assembly", status: "In Progress", updatedAt: "25-03-2026" },
-    { id: "PROD-1030", orderRef: "ORD-002", product: "HVAC Unit V3", quantity: 5, stage: "Cutting", status: "Delayed", updatedAt: "24-03-2026" },
-    { id: "PROD-1031", orderRef: "ORD-003", product: "Motor Assemblies", quantity: 100, stage: "Packaging", status: "Completed", updatedAt: "23-03-2026" },
-    { id: "PROD-1032", orderRef: "ORD-006", product: "Copper Wiring Bundle", quantity: 50, stage: "Raw Materials", status: "On Hold", updatedAt: "22-03-2026" },
-    { id: "PROD-1033", orderRef: "ORD-010", product: "Industrial Generator", quantity: 2, stage: "Quality Check", status: "In Progress", updatedAt: "25-03-2026" },
-];
+    stage: string;
+    updated_at: string;
+    customer_name: string;
+    assigned_to_name: string;
+}
 
 const ProductionList: React.FC = () => {
     const navigate = useNavigate();
-
+    const dispatch = useAppDispatch();
     const calendarRef = useRef<HTMLDivElement>(null);
-    const [jobs, setJobs] = useState<ProductionJob[]>(INITIAL_JOBS);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [activeTab, setActiveTab] = useState<TimeTab | "Custom">("All Time");
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [customDateRange, setCustomDateRange] = useState<DateRange>({
-        from: "",
-        to: formatDateForInput(new Date()),
-    });
 
+    // Redux State
+    const { productions, loading } = useAppSelector((state: RootState) => state.SalesProduction);
+
+    // Filter & Search States
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeTab, setActiveTab] = useState<TimeTab>("All Time");
     const [statusFilter, setStatusFilter] = useState<ProdStatus>("All");
+    const [customRange, setCustomRange] = useState({ start: "", end: new Date().toISOString().split("T")[0] });
+
+    // UI Logic States
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isStatusOpen, setIsStatusOpen] = useState(false);
 
+    // Professional Pagination States
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const itemsPerPage = 10;
 
-    // Handle clicking outside the calendar popup to close it
+    useEffect(() => {
+        dispatch(getProductions());
+        return () => { dispatch(clearSalesErrors()); };
+    }, [dispatch]);
+
+    // Close calendar on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
@@ -71,173 +74,178 @@ const ProductionList: React.FC = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Reset pagination on filter change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, statusFilter, activeTab, itemsPerPage]);
+
+    // --- Filtering Logic ---
     const filteredJobs = useMemo(() => {
-        return jobs.filter((j) => {
-            const matchesSearch = Object.values(j).some((val) => String(val).toLowerCase().includes(searchQuery.toLowerCase()));
+        if (!productions) return [];
+        return (productions as ProductionJob[]).filter((j) => {
+            const matchesSearch =
+                j.job_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                j.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                j.order_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                j.customer_name?.toLowerCase().includes(searchQuery.toLowerCase());
+
             const matchesStatus = statusFilter === "All" || j.status === statusFilter;
 
             let matchesTime = true;
+            const updatedDate = new Date(j.updated_at || new Date());
+            const now = new Date();
+
             if (activeTab === "Custom") {
-                matchesTime = isDateWithinCustomRange(j.updatedAt, customDateRange);
-            } else {
-                matchesTime = isDateInRange(j.updatedAt, activeTab as TimeTab);
+                const start = customRange.start ? new Date(customRange.start) : null;
+                const end = customRange.end ? new Date(customRange.end) : null;
+                if (start) matchesTime = matchesTime && updatedDate >= start;
+                if (end) {
+                    const endOfRange = new Date(end);
+                    endOfRange.setHours(23, 59, 59);
+                    matchesTime = matchesTime && updatedDate <= endOfRange;
+                }
+            } else if (activeTab !== "All Time") {
+                const diffInDays = (now.getTime() - updatedDate.getTime()) / (1000 * 60 * 60 * 24);
+                if (activeTab === "Weekly") matchesTime = diffInDays <= 7 && diffInDays >= 0;
+                if (activeTab === "Monthly") matchesTime = updatedDate.getMonth() === now.getMonth() && updatedDate.getFullYear() === now.getFullYear();
+                if (activeTab === "Yearly") matchesTime = updatedDate.getFullYear() === now.getFullYear();
             }
 
             return matchesSearch && matchesStatus && matchesTime;
         });
-    }, [jobs, searchQuery, statusFilter, activeTab, customDateRange]);
+    }, [productions, searchQuery, statusFilter, activeTab, customRange]);
 
+    // --- Pagination Logic ---
     const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
     const paginatedJobs = filteredJobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisible = 5;
+        if (totalPages <= maxVisible) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            if (currentPage > 3) pages.push("...");
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+            for (let i = start; i <= end; i++) if (!pages.includes(i)) pages.push(i);
+            if (currentPage < totalPages - 2) pages.push("...");
+            pages.push(totalPages);
+        }
+        return pages;
+    };
 
     const toggleSelectAll = () => {
         if (selectedIds.length === paginatedJobs.length) setSelectedIds([]);
         else setSelectedIds(paginatedJobs.map(j => j.id));
     };
 
-    const toggleSelectOne = (id: string) => {
-        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-    };
-
-    const getStatusColor = (st: string) => {
+    // --- Dynamic Styling ---
+    const getStatusStyle = (st: string) => {
+        const base = "px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ";
         switch (st) {
-            case "In Progress": return "bg-blue-50 text-blue-600 border-blue-200";
-            case "Completed": return "bg-green-50 text-green-600 border-green-200";
-            case "Delayed": return "bg-red-50 text-red-600 border-red-200";
-            case "On Hold": return "bg-orange-50 text-orange-600 border-orange-200";
-            default: return "bg-gray-50 text-gray-600 border-gray-200";
+            case "In Progress": return base + "bg-blue-50 text-blue-600 border-blue-100";
+            case "Completed": return base + "bg-emerald-50 text-emerald-600 border-emerald-100";
+            case "Delayed": return base + "bg-rose-50 text-rose-600 border-rose-100";
+            case "On Hold": return base + "bg-amber-50 text-amber-600 border-amber-100";
+            default: return base + "bg-slate-50 text-slate-400 border-slate-100";
         }
     }
 
-    const getStageColor = (st: string) => {
+    const getStageStyle = (st: string) => {
+        const base = "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ";
         switch (st) {
-            case "Raw Materials": return "text-purple-600 bg-purple-50 font-medium";
-            case "Cutting": return "text-indigo-600 bg-indigo-50 font-medium";
-            case "Assembly": return "text-teal-600 bg-teal-50 font-medium";
-            case "Quality Check": return "text-blue-600 bg-blue-50 font-medium";
-            case "Packaging": return "text-green-600 bg-green-50 font-medium";
-            default: return "text-gray-600 bg-gray-50 font-medium";
+            case "Raw Materials": return base + "text-purple-600 bg-purple-50";
+            case "Cutting": return base + "text-indigo-600 bg-indigo-50";
+            case "Assembly": return base + "text-teal-600 bg-teal-50";
+            case "Quality Check": return base + "text-blue-600 bg-blue-50";
+            case "Packaging": return base + "text-emerald-600 bg-emerald-50";
+            default: return base + "text-slate-500 bg-slate-50";
         }
     }
 
     return (
-        <div className="min-h-screen bg-[#f4f7f6] p-4 sm:p-6 lg:p-8 font-sans text-gray-900">
+        <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-10 font-sans text-slate-900">
             <div className="max-w-7xl mx-auto">
-                {/* Header Section */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
 
+                {/* Header */}
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Production Tracking</h1>
-                        <p className="text-sm text-gray-500 mt-1 font-medium">Monitor live manufacturing stages.</p>
+                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+                            Production Tracking <Factory className="text-[#005d52]" size={28} />
+                        </h1>
+                        <p className="text-slate-500 mt-1 font-medium">Real-time oversight of manufacturing floor stages.</p>
                     </div>
                 </header>
 
-                {/* Tabs Row with Custom Range Popup - Matches Opportunity style */}
+                {/* Filters */}
                 <section className="relative mb-8 flex flex-wrap items-center gap-3">
-                    <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white/80 backdrop-blur-md rounded-2xl border border-white shadow-sm w-fit">
+                    <div className="flex p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
                         {(["Weekly", "Monthly", "Quarterly", "Yearly", "All Time"] as TimeTab[]).map((tab) => (
                             <button
                                 key={tab}
-                                onClick={() => { setActiveTab(tab); setCurrentPage(1); setIsCalendarOpen(false); }}
-                                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? "bg-[#005d52] text-white shadow-md" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"}`}
                             >
                                 {tab}
                             </button>
                         ))}
-                        <button
-                            onClick={() => {
-                                setActiveTab("Custom");
-                                setIsCalendarOpen(!isCalendarOpen)
-                            }
-
-                            }
-
-                            className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
-                        >
-                            <CalendarIcon size={14} /> Custom
-                        </button>
                     </div>
 
-                    {/* Lead-Style Calendar Popup positioned below the button */}
-                    {isCalendarOpen && (
-                        <div
-                            ref={calendarRef}
-                            className="absolute top-full mt-2 left-0 lg:left-80 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 min-w-[320px] animate-in zoom-in-95 duration-200"
-                        >
-                            <div className="flex justify-between items-center mb-4">
-                                <h4 className="text-sm font-bold text-gray-800">Select Date Range</h4>
-                                <button onClick={() => setIsCalendarOpen(false)}><X size={18} className="text-gray-400" /></button>
-                            </div>
-                            <div className="grid gap-4">
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Start Date</label>
-                                    <input
-                                        type="date"
-                                        value={customDateRange.from}
-                                        onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                    />
-                                </div>
-                                <div className="grid gap-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">End Date</label>
-                                    <div className="relative">
-                                        <input
-                                            type="date"
-                                            onChange={(e) => {
-                                                const date = new Date(e.target.value);
-                                                const day = String(date.getDate()).padStart(2, "0");
-                                                const month = String(date.getMonth() + 1).padStart(2, "0");
-                                                const year = date.getFullYear();
+                    <button
+                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                        className={`px-5 py-3 text-xs font-bold rounded-2xl border transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-teal-50 border-teal-200 text-[#005d52]" : "bg-white border-slate-200 text-slate-500"}`}
+                    >
+                        <CalendarIcon size={14} /> Custom Range
+                    </button>
 
-                                                const formatted = `${day}-${month}-${year}`;
-                                                setCustomDateRange({ ...customDateRange, to: formatted });
-                                            }}
-                                            className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                                        />
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); setCurrentPage(1); }}
-                                    className="w-full py-3 bg-[#005d52] text-white rounded-xl font-bold text-xs shadow-lg shadow-teal-900/20"
-                                >
-                                    Apply Range
-                                </button>
+                    {isCalendarOpen && (
+                        <div ref={calendarRef} className="absolute top-full mt-3 left-0 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 min-w-[320px] animate-in fade-in zoom-in-95">
+                            <div className="flex justify-between items-center mb-4">
+                                <h4 className="text-sm font-bold text-slate-800">Custom Date Filter</h4>
+                                <button onClick={() => setIsCalendarOpen(false)}><X size={18} className="text-slate-400" /></button>
+                            </div>
+                            <div className="space-y-4">
+                                <input type="date" value={customRange.start} onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })} className="w-full p-3 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+                                <input type="date" value={customRange.end} onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })} className="w-full p-3 bg-slate-50 border-none rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+                                <button onClick={() => { setActiveTab("Custom"); setIsCalendarOpen(false); }} className="w-full py-3.5 bg-[#005d52] text-white rounded-xl font-bold text-xs shadow-lg">Apply Selection</button>
                             </div>
                         </div>
                     )}
                 </section>
 
-                {/* Table Container */}
-                <div className="bg-white rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                {/* Main Table Area */}
+                <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
 
                     {/* Toolbar */}
-                    <div className="p-6 flex flex-col xl:flex-row justify-between items-center gap-4 bg-white border-b border-gray-50">
-                        <div className="relative w-full xl:w-96 group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#005d52] transition-colors" size={18} />
+                    <div className="p-6 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-slate-50">
+                        <div className="relative w-full lg:w-96">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search by Job ID or Order Reference..."
+                                placeholder="Search by Job ID, Order or Product..."
                                 value={searchQuery}
-                                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                                className="w-full pl-12 pr-4 py-3 bg-[#f8faf9] border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-[#005d52]/10 text-sm outline-none transition-all"
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-teal-500/5 text-sm outline-none transition-all placeholder:text-slate-400"
                             />
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-end gap-3 w-full xl:w-auto">
-                            <div className="relative">
+                        <div className="flex flex-wrap items-center justify-end gap-3 w-full lg:w-auto">
+                            <div className="relative min-w-35">
                                 <button
                                     onClick={() => setIsStatusOpen(!isStatusOpen)}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${statusFilter !== "All" ? "bg-teal-50 border-[#005d52] text-[#005d52]" : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"}`}
+                                    className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl border text-[13px] font-bold ${statusFilter !== "All" ? "bg-teal-50 border-teal-200 text-[#005d52]" : "bg-white border-slate-200 text-slate-600"}`}
                                 >
-                                    {statusFilter === "All" ? "Status" : statusFilter} <ChevronDown size={14} />
+                                    {statusFilter === "All" ? "Status" : statusFilter} <ChevronDown size={14} className={isStatusOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                                 </button>
                                 {isStatusOpen && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-50 rounded-2xl shadow-2xl z-50 overflow-hidden py-1">
+                                    <div className="absolute right-0 mt-2 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 py-2">
                                         {["All", "In Progress", "On Hold", "Completed", "Delayed"].map(opt => (
                                             <button
                                                 key={opt}
-                                                onClick={() => { setStatusFilter(opt as ProdStatus); setIsStatusOpen(false); setCurrentPage(1); }}
-                                                className={`w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 transition-colors ${statusFilter === opt ? "text-[#005d52] font-bold" : "text-gray-600"}`}
+                                                onClick={() => { setStatusFilter(opt as ProdStatus); setIsStatusOpen(false); }}
+                                                className={`w-full text-left px-4 py-2.5 text-[13px] hover:bg-slate-50 ${statusFilter === opt ? "text-[#005d52] font-bold bg-teal-50/50" : "text-slate-600"}`}
                                             >
                                                 {opt}
                                             </button>
@@ -245,88 +253,68 @@ const ProductionList: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                            <button
-                                onClick={() => { setJobs(prev => prev.filter(j => !selectedIds.includes(j.id))); setSelectedIds([]) }}
-                                disabled={selectedIds.length === 0}
-                                className="p-2.5 bg-red-50 text-red-500 rounded-xl disabled:opacity-40 hover:bg-red-100 transition-colors"
-                            >
-                                <Trash2 size={18} />
+                            <button disabled={selectedIds.length === 0} className="p-3 bg-rose-50 text-rose-500 rounded-xl disabled:opacity-20 transition-colors">
+                                <Trash2 size={20} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Table Area with Vertical Lines */}
+                    {/* Table Area */}
                     <div className="w-full overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-gray-50/50">
-                                    <th className="w-12 p-4 text-center border-b border-gray-100 border-r">
-                                        <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.length === paginatedJobs.length && paginatedJobs.length > 0} onChange={toggleSelectAll} />
+                                <tr className="bg-slate-50/50">
+                                    <th className="w-16 p-5 text-center border-b  border-r border-slate-100">
+                                        <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.length === paginatedJobs.length && paginatedJobs.length > 0} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Job ID
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Order Ref
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Product
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-">
-                                        Qty
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Stage
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r ">
-                                        Status
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 border-r">
-                                        Updated
-                                    </th>
-                                    <th className="p-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-100 text-center ">
-                                        Actions
-                                    </th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100 text-center">Job ID</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100">Order ID</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100">Product</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100 text-center">Qty</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100 text-center">Stage</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100 text-center">Status</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-r border-slate-100">Updated</th>
+                                    <th className="px-4 py-5 text-[13px] text-slate-800 uppercase tracking-widest border-b border-slate-100 text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-slate-50">
                                 {paginatedJobs.map((j) => (
-                                    <tr key={j.id} className="hover:bg-[#f8faf9]/80 transition-colors">
-                                        <td className="p-4 text-center border-r border-gray-100">
-                                            <input type="checkbox" className="accent-[#005d52] w-4 h-4" checked={selectedIds.includes(j.id)} onChange={() => toggleSelectOne(j.id)} />
+                                    <tr key={j.id} className="group hover:bg-teal-50/20 transition-colors">
+                                        <td className="p-5 text-center border-r border-slate-50">
+                                            <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.includes(j.id)} onChange={() => setSelectedIds(prev => prev.includes(j.id) ? prev.filter(i => i !== j.id) : [...prev, j.id])} />
                                         </td>
-                                        <td className="p-4 text-[13px] font-bold text-[#005d52] border-r border-gray-100">
-                                            {j.id}
+                                        <td className="px-4 py-5 text-[13px] text-slate-800 border-r border-slate-50 text-center">{j.job_id}</td>
+                                        <td className="px-4 py-5 text-[13px] text-slate-800 border-r border-slate-50 text-center">{j.order_id}</td>
+                                        
+                                        <td className="px-4 py-5 text-[13px] font-bold text-slate-900 border-r border-slate-50 truncate max-w-45" title={j.product_name}>
+                                            {j.product_name}
                                         </td>
-                                        <td className="p-4 text-[13px] font-bold text-gray-600  cursor-pointer hover:text-[#3b2fe8] border-r border-gray-100">
-                                            {j.orderRef}
-                                        </td>
-                                        <td className="p-4 text-[13px] text-gray-800 border-r border-gray-100">
-                                            {j.product}
-                                        </td>
-                                        <td className="p-4 text-[13px] text-gray-600 border-r border-gray-100">
+                                        <td className="px-4 py-5 text-[13px] font-black text-slate-800 border-r border-slate-50 text-center">
                                             {j.quantity}
                                         </td>
-                                        <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${getStageColor(j.stage)}`}>
+                                        <td className="px-4 py-5 border-r border-slate-50 text-center">
+                                            <span className={getStageStyle(j.stage)}>
                                                 {j.stage}
                                             </span>
                                         </td>
-                                        <td className="p-4 border-r border-gray-100">
-                                            <span className={`px-3 py-1 rounded-full border text-[11px] font-bold whitespace-nowrap ${getStatusColor(j.status)}`}>
+                                        <td className="px-4 py-5 border-r border-slate-50 text-center">
+                                            <span className={getStatusStyle(j.status)}>
                                                 {j.status}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-[13px] text-gray-500 whitespace-nowrap border-r border-gray-100">
-                                            {j.updatedAt}
+                                        <td className="px-4 py-5 text-[12px] text-slate-800 whitespace-nowrap border-r border-slate-50">
+                                            {new Date(j.updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-1 justify-center">
-                                                <button className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-[#005d52] rounded-md transition-all" onClick={() => navigate(`/sales/production/production-edit/${j.id}`)}>
-                                                    <Edit3 size={18} />
+                                        <td className="px-4 py-5">
+                                            <div className="flex justify-center gap-1">
+                                                <button title="Edit Production" className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all" onClick={() => navigate(`/sales/production/production-edit/${j.id}`)}>
+                                                    <Edit3 size={16} />
                                                 </button>
-                                                <button className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-md transition-all" onClick={() => setJobs(prev => prev.filter(x => x.id !== j.id))}>
-                                                    <Trash2 size={18} />
+                                                <button title="Settings" className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-slate-600 rounded-xl transition-all">
+                                                    <Settings size={16} />
+                                                </button>
+                                                <button title="Delete Job" className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-rose-600 rounded-xl transition-all">
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </td>
@@ -334,26 +322,43 @@ const ProductionList: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
+                        {!loading && filteredJobs.length === 0 && (
+                            <div className="py-32 flex flex-col items-center justify-center text-center">
+                                <div className="p-6 bg-slate-50 rounded-full mb-4">
+                                    <Settings className="text-slate-200 animate-spin-slow" size={40} />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-800">No Production Jobs</h3>
+                                <p className="text-slate-400 text-sm max-w-xs">We couldn't find any manufacturing records matching these filters.</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Pagination Footer */}
-                    <footer className="p-6 bg-gray-50/30 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            Showing <span className="text-gray-900">{paginatedJobs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredJobs.length)}</span> of <span className="text-gray-900">{filteredJobs.length}</span> Results
+                    <footer className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div className="flex items-center gap-6">
+
+                            <div className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">
+                                Showing <span className="text-slate-900">{paginatedJobs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredJobs.length)}</span> of <span className="text-slate-900">{filteredJobs.length}</span> Jobs
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-60 transition-colors">
-                                <ChevronLeft size={20} />
+
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] disabled:opacity-30 transition-all shadow-sm">
+                                <ChevronLeft size={18} strokeWidth={2.5} />
                             </button>
-                            <div className="flex gap-2">
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${currentPage === i + 1 ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20" : "text-gray-400 hover:bg-gray-100"}`}>
-                                        {i + 1}
-                                    </button>
+
+                            <div className="flex items-center gap-1.5">
+                                {getPageNumbers().map((page, i) => (
+                                    page === "..." ? <span key={i} className="px-2 text-slate-300"><MoreHorizontal size={14} /></span> : (
+                                        <button key={i} onClick={() => setCurrentPage(page as number)} className={`min-w-10 h-10 rounded-xl text-xs font-bold transition-all ${currentPage === page ? "bg-[#005d52] text-white shadow-lg shadow-teal-900/20 scale-105" : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 shadow-sm"}`}>
+                                            {page}
+                                        </button>
+                                    )
                                 ))}
                             </div>
-                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 text-gray-400 hover:text-[#005d52] disabled:opacity-60 transition-colors">
-                                <ChevronRight size={20} />
+
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-[#005d52] disabled:opacity-30 transition-all shadow-sm">
+                                <ChevronRight size={18} strokeWidth={2.5} />
                             </button>
                         </div>
                     </footer>

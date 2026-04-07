@@ -5,6 +5,10 @@ import salesLeadReducer from "../components/modules/sales/ModuleStateFiles/LeadS
 import dashboardReducer from "../components/modules/sales/ModuleStateFiles/DashboardSlice";
 import SalesProductReducer from "../components/modules/sales/ModuleStateFiles/ProductSlice";
 import OpportunitiesReducer from "../components/modules/sales/ModuleStateFiles/OpportunitySlice";
+import QuotationReducer from "../components/modules/sales/ModuleStateFiles/QuotationSlice";
+import OrderReducer from "../components/modules/sales/ModuleStateFiles/OrderSlice";
+import ProductionReducer from "../components/modules/sales/ModuleStateFiles/ProductionSlice";
+
 const store = configureStore({
     reducer: {
         // global Login reducer
@@ -15,6 +19,9 @@ const store = configureStore({
         SalesDashboard: dashboardReducer,
         SalesProduct: SalesProductReducer,
         SalesOpportunity: OpportunitiesReducer,
+        SalesQuotation: QuotationReducer,
+        SalesOrder: OrderReducer,
+        SalesProduction: ProductionReducer,
     },
 });
 
