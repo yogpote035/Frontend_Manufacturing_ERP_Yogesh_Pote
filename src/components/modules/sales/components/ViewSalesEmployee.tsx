@@ -45,7 +45,7 @@ const ViewSalesEmployee: React.FC = () => {
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
               <button onClick={() => navigate("/sales/employees")} className="hover:text-[#005d52] transition-colors">Employees</button>
               <ChevronRight size={14} />
-              <span className="text-slate-600 font-semibold">{employee.user_id}</span>
+              <span className="text-slate-500 font-medium">{employee.user_id}</span>
             </div>
             <h1 className="text-2xl font-bold text-slate-900">Profile Overview</h1>
           </div>

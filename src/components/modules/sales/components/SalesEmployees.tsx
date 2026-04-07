@@ -238,19 +238,7 @@ const SalesEmployees: React.FC = () => {
 
           {/* Left: Rows Per Page & Stats */}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">Display</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="bg-white border border-slate-200 text-sm font-bold text-[#005d52] py-1.5 px-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-500/20 cursor-pointer"
-              >
-                {[10, 25, 50].map(val => (
-                  <option key={val} value={val}>{val} Rows</option>
-                ))}
-              </select>
-            </div>
-            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+           
             <div className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">
               Showing <span className="text-slate-900">{paginatedData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to <span className="text-slate-900">{Math.min(currentPage * itemsPerPage, filteredEmployees.length)}</span> of <span className="text-slate-900">{filteredEmployees.length}</span> Employees
             </div>

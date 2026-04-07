@@ -48,8 +48,8 @@ const StatCard = ({ title, value, svg }: StatCardProps) => (
 
 export const Dashboard = () => {
   const dispatch = useAppDispatch();
-  
-  const { salesByCategory, pipeline } = useAppSelector((state: RootState) => state.SalesDashboard);
+
+  const { salesByCategory, stats, pipeline } = useAppSelector((state: RootState) => state.SalesDashboard);
 
   const [filter, setFilter] = useState<FilterType>("Weekly");
   const [customRange, setCustomRange] = useState({ start: "", end: new Date().toISOString().split("T")[0] });
@@ -80,7 +80,7 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#f4f7f6] p-4 sm:p-6 lg:p-8 font-sans text-gray-800">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* HEADER & TIME FILTERS */}
         <div className="mb-10 flex flex-col xl:flex-row xl:items-end justify-between gap-6">
           <div>
@@ -89,8 +89,8 @@ export const Dashboard = () => {
             <div className="flex items-center gap-2 mt-4">
               <div className="flex items-center gap-2 bg-[#005d52] text-white px-4 py-3 rounded-2xl text-[11px] font-bold shadow-lg shadow-teal-900/10">
                 <CalendarIcon size={13} />
-                {filter === "Custom" ? 
-                  (customRange.start ? `${customRange.start} to ${customRange.end}` : "Custom Selection") 
+                {filter === "Custom" ?
+                  (customRange.start ? `${customRange.start} to ${customRange.end}` : "Custom Selection")
                   : `${filter} Overview`}
               </div>
               {/* {loading && <Loader2 className="animate-spin text-[#005d52]" size={20} />} */}
@@ -103,18 +103,16 @@ export const Dashboard = () => {
                 <button
                   key={f}
                   onClick={() => { setFilter(f); setIsCalendarOpen(false); }}
-                  className={`px-5 py-2 text-xs font-bold rounded-xl transition-all duration-300 ${
-                    filter === f ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-700"
-                  }`}
+                  className={`px-5 py-2 text-xs font-bold rounded-xl transition-all duration-300 ${filter === f ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-700"
+                    }`}
                 >
                   {f}
                 </button>
               ))}
               <button
                 onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${
-                  filter === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-700"
-                }`}
+                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${filter === "Custom" ? "bg-[#d1e9e7] text-[#005d52] shadow-sm" : "text-gray-400 hover:text-gray-700"
+                  }`}
               >
                 <CalendarIcon size={14} /> Custom
               </button>
@@ -142,15 +140,15 @@ export const Dashboard = () => {
 
         {/* STATS GRID (Keeping mock for now) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <StatCard title="Total Leads" value={MOCK_STATS.leads} svg="/icons/users.svg" />
-          <StatCard title="Deals Won" value={MOCK_STATS.won} svg="/icons/win.svg" />
-          <StatCard title="Revenue" value={`₹${MOCK_STATS.revenue}`} svg="/icons/rupee.svg" />
-          <StatCard title="Win Rate" value={MOCK_STATS.rate} svg="/icons/trending.svg" />
+          <StatCard title="Total Leads" value={stats?.totalLeads} svg="/icons/users.svg" />
+          <StatCard title="Deals Won" value={stats?.dealsWon} svg="/icons/win.svg" />
+          <StatCard title="Revenue" value={`₹${stats?.totalRevenue}`} svg="/icons/rupee.svg" />
+          <StatCard title="Win Rate" value={`${stats?.winRate}%`} svg="/icons/trending.svg" />
         </div>
 
         {/* CHARTS (Using Redux Data) */}
         <div className="grid grid-cols-1 gap-8">
-          
+
           {/* Sales Pipeline Chart */}
           <div className="bg-white p-6 sm:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm w-full">
             <h3 className="text-[11px] font-bold text-gray-800 uppercase tracking-widest mb-1">Sales Pipeline</h3>

@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { 
-    ChevronRight, 
-    Calendar, 
-    Building2, 
-    MapPin, 
-    Edit3, 
-     
-    IndianRupee, 
+import {
+    ChevronRight,
+    Calendar,
+    Building2,
+    MapPin,
+    Edit3,
+
+    IndianRupee,
     Loader2,
     Mail,
     Phone,
@@ -59,7 +59,7 @@ const OpportunityView: React.FC = () => {
     //                 orientation: 'portrait' as const // Fix 3: Use 'as const' here too
     //             }
     //         };
-            
+
     //         try {
     //             // @ts-ignore - html2pdf types can sometimes be finicky even with proper casting
     //             await html2pdf().set(opt).from(element).save();
@@ -86,23 +86,23 @@ const OpportunityView: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-10 font-sans text-slate-900">
             <div className="max-w-5xl mx-auto">
-                
+
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                     <div>
-                        <div className="flex items-center gap-2 text-slate-400 mb-2 text-[10px] font-black uppercase tracking-[0.15em]">
-                            <button onClick={() => navigate("/sales/opportunities")} className="hover:text-[#005d52] transition-colors">Pipeline</button>
-                            <ChevronRight size={12} />
-                            <span className="text-[#005d52]">{opportunity?.opp_id || "Loading..."}</span>
+                        <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+                            <button onClick={() => navigate("/sales/opportunities")} className="hover:text-[#005d52] transition-colors">Opportunities</button>
+                            <ChevronRight size={14} />
+                            <span className="text-slate-500 font-medium">{opportunity?.opp_id}</span>
                         </div>
                         <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Opportunity Overview</h1>
                     </div>
-                    
+
                     <div className="flex gap-3 w-full md:w-auto">
                         {/* <button onClick={handleExport} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-slate-600 px-6 py-3.5 rounded-2xl font-bold text-xs border border-slate-200 shadow-sm hover:bg-slate-50 transition-all">
                             <Download size={16} /> Export PDF
                         </button> */}
-                        <button 
+                        <button
                             onClick={() => navigate(`/sales/opportunities/opportunity-edit/${id}`)}
                             className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#005d52] text-white px-8 py-3.5 rounded-2xl font-bold text-xs shadow-xl shadow-teal-900/20 hover:bg-[#004a41] transition-all"
                         >
@@ -113,15 +113,15 @@ const OpportunityView: React.FC = () => {
 
                 {/* PDF Content Container */}
                 <div id="opportunity-pdf-content" className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-                    
+
                     {/* Visual Stepper */}
                     <div className="bg-slate-50/80 p-10 border-b border-slate-100">
                         <div className="relative max-w-3xl mx-auto">
                             {/* Track */}
                             <div className="absolute top-5 left-0 w-full h-1 bg-slate-200 rounded-full z-0" />
                             {/* Progress */}
-                            <div 
-                                className="absolute top-5 left-0 h-1 bg-[#005d52] transition-all duration-700 ease-in-out z-0 rounded-full" 
+                            <div
+                                className="absolute top-5 left-0 h-1 bg-[#005d52] transition-all duration-700 ease-in-out z-0 rounded-full"
                                 style={{ width: `${(currentStageIndex / (stages.length - 1)) * 100}%` }}
                             />
 
@@ -130,14 +130,12 @@ const OpportunityView: React.FC = () => {
                                     const isReached = index <= currentStageIndex;
                                     return (
                                         <div key={stage} className="flex flex-col items-center">
-                                            <div className={`w-10 h-10 rounded-2xl border-4 border-white shadow-lg flex items-center justify-center transition-all duration-500 ${
-                                                isReached ? 'bg-[#005d52] text-white scale-110' : 'bg-slate-200 text-slate-400'
-                                            }`}>
+                                            <div className={`w-10 h-10 rounded-2xl border-4 border-white shadow-lg flex items-center justify-center transition-all duration-500 ${isReached ? 'bg-[#005d52] text-white scale-110' : 'bg-slate-200 text-slate-400'
+                                                }`}>
                                                 <span className="text-xs font-black">{index + 1}</span>
                                             </div>
-                                            <span className={`mt-4 text-[9px] font-black uppercase tracking-widest ${
-                                                isReached ? 'text-[#005d52]' : 'text-slate-300'
-                                            }`}>
+                                            <span className={`mt-4 text-[9px] font-black uppercase tracking-widest ${isReached ? 'text-[#005d52]' : 'text-slate-300'
+                                                }`}>
                                                 {stage}
                                             </span>
                                         </div>
@@ -148,24 +146,24 @@ const OpportunityView: React.FC = () => {
                     </div>
 
                     <div className="p-8 md:p-14 space-y-14">
-                        
+
                         {/* Section 1: Core Identification */}
                         <section>
                             <div className="flex items-center gap-3 mb-10">
                                 <div className="w-10 h-10 bg-teal-50 text-[#005d52] rounded-xl flex items-center justify-center border border-teal-100">
-                                    <Building2 size={20}/>
+                                    <Building2 size={20} />
                                 </div>
                                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">Customer Profile</h3>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-12">
                                 <DetailItem label="Company Name" value={opportunity?.company_name} isHighlight />
-                                <DetailItem label="Opportunity ID" value={opportunity?.opp_id} icon={<Hash size={12}/>}/>
+                                <DetailItem label="Opportunity ID" value={opportunity?.opp_id} icon={<Hash size={12} />} />
                                 <DetailItem label="Lead Source" value={opportunity?.source || "Direct Search"} />
                                 <DetailItem label="Account Status" value={opportunity?.status} isStatus />
-                                
+
                                 <DetailItem label="Contact Person" value={opportunity?.contact_person || "Not Assigned"} />
-                                <DetailItem label="Mobile Number" icon={<Phone size={12}/>} value={opportunity?.phone || "N/A"} />
-                                <DetailItem label="Email Identity" icon={<Mail size={12}/>} value={opportunity?.email || "N/A"} />
+                                <DetailItem label="Mobile Number" icon={<Phone size={12} />} value={opportunity?.phone || "N/A"} />
+                                <DetailItem label="Email Identity" icon={<Mail size={12} />} value={opportunity?.email || "N/A"} />
                                 <DetailItem label="Lead Reference" value={`#${opportunity?.lead_id}`} />
                             </div>
                         </section>
@@ -174,11 +172,11 @@ const OpportunityView: React.FC = () => {
                         <section className="bg-slate-50/50 rounded-[2.5rem] p-10 border border-slate-100">
                             <div className="flex items-center gap-3 mb-10">
                                 <div className="w-10 h-10 bg-teal-50 text-[#005d52] rounded-xl flex items-center justify-center border border-teal-100">
-                                    <IndianRupee size={20}/>
+                                    <IndianRupee size={20} />
                                 </div>
                                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">Deal Valuation</h3>
                             </div>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Expected Revenue</p>
@@ -190,7 +188,7 @@ const OpportunityView: React.FC = () => {
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Target Closure</p>
                                     <p className="text-lg font-bold text-slate-700 flex items-center gap-2">
-                                        <Calendar size={18} className="text-[#005d52] opacity-40"/>
+                                        <Calendar size={18} className="text-[#005d52] opacity-40" />
                                         {opportunity?.expected_close_date ? new Date(opportunity.expected_close_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "TBD"}
                                     </p>
                                 </div>
@@ -210,7 +208,7 @@ const OpportunityView: React.FC = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                             <section>
                                 <div className="flex items-center gap-3 mb-6">
-                                    <Info size={16} className="text-[#005d52]"/>
+                                    <Info size={16} className="text-[#005d52]" />
                                     <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">Current Classification</h3>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -229,7 +227,7 @@ const OpportunityView: React.FC = () => {
 
                             <section>
                                 <div className="flex items-center gap-3 mb-6">
-                                    <MapPin size={16} className="text-[#005d52]"/>
+                                    <MapPin size={16} className="text-[#005d52]" />
                                     <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">Business Location</h3>
                                 </div>
                                 <div className="p-8 bg-slate-50/50 rounded-[2rem] text-xs text-slate-500 font-medium leading-relaxed italic border border-slate-100 min-h-[100px] flex items-center">
@@ -241,7 +239,7 @@ const OpportunityView: React.FC = () => {
                         {/* Section 4: Notes */}
                         <section>
                             <div className="flex items-center gap-2 mb-6">
-                                <Briefcase size={16} className="text-[#005d52]"/>
+                                <Briefcase size={16} className="text-[#005d52]" />
                                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">Internal Deal Intelligence</h3>
                             </div>
                             <div className="bg-[#fafffe] border-l-4 border-[#005d52] p-8 rounded-r-3xl shadow-sm">
@@ -268,8 +266,8 @@ const OpportunityView: React.FC = () => {
 };
 
 // --- Professional Detail Item Component ---
-const DetailItem: React.FC<{ label: string; value: string | null; isHighlight?: boolean; isStatus?: boolean; icon?: React.ReactNode }> = ({ 
-    label, value, isHighlight, isStatus, icon 
+const DetailItem: React.FC<{ label: string; value: string | null; isHighlight?: boolean; isStatus?: boolean; icon?: React.ReactNode }> = ({
+    label, value, isHighlight, isStatus, icon
 }) => (
     <div className="flex flex-col gap-2">
         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</span>

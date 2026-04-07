@@ -317,7 +317,9 @@ const LeadList: React.FC = () => {
                                         <td className="px-4 py-4 text-[13px] text-slate-800 whitespace-nowrap text-center">
                                             {new Date(lead.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                         </td>
-                                        <td className="px-4 py-4 text-[13px] text-slate-800 truncate max-w-50 text-center">{lead.company_name}</td>
+                                        <td
+                                            onClick={() => navigate("/sales/leads/view-lead/" + lead.id)}
+                                            className="cursor-pointer hover:text-slate-600 px-4 py-4 text-[13px] text-slate-800 truncate max-w-50 text-center">{lead.company_name}</td>
                                         <td className="px-4 py-4 text-[13px] text-slate-800 text-center">
                                             {lead.products?.reduce((total, p) => total + (p.quantity || 0), 0) || 0}
                                         </td>
@@ -329,7 +331,8 @@ const LeadList: React.FC = () => {
                                         </td>
                                         <td className="px-4 py-4">
                                             <div className="flex justify-center gap-2">
-                                                <button onClick={() => navigate("/sales/leads/view-lead/" + lead.id)} className="outline-none p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all">
+                                                <button
+                                                    onClick={() => navigate("/sales/leads/view-lead/" + lead.id)} className="outline-none p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all">
                                                     <Eye size={16} />
                                                 </button>
                                                 <button onClick={() => navigate("/sales/leads/edit-lead/" + lead.id)} className="outline-none p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-blue-600 rounded-xl transition-all">
@@ -360,19 +363,7 @@ const LeadList: React.FC = () => {
 
                         {/* Left: Rows Per Page */}
                         <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">Display</span>
-                                <select
-                                    value={itemsPerPage}
-                                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                    className="outline-none bg-white border border-slate-200 text-sm font-bold text-[#005d52] py-1.5 px-3 rounded-xl focus:ring-2 focus:ring-teal-500/20 cursor-pointer"
-                                >
-                                    {[10, 25, 50, 100].map(val => (
-                                        <option key={val} value={val}>{val} Rows</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+                           
                             <div className="text-[11px] text-slate-800 font-bold uppercase tracking-widest">
                                 Showing <span className="text-slate-800">{paginatedLeads.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to <span className="text-slate-900">{Math.min(currentPage * itemsPerPage, filteredLeads.length)}</span> of <span className="text-slate-900">{filteredLeads.length}</span> Results
                             </div>
