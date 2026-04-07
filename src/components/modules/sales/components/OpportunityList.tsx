@@ -55,7 +55,6 @@ const OpportunityList: React.FC = () => {
     // Professional Pagination States
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
-    setItemsPerPage(10)
     // UI States
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
