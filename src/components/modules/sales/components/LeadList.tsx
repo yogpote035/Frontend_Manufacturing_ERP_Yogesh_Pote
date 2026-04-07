@@ -60,6 +60,7 @@ const LeadList: React.FC = () => {
     // Professional Pagination States
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    
     // UI States
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -358,12 +359,7 @@ const LeadList: React.FC = () => {
                     <footer className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
 
                         {/* Left: Rows Per Page */}
-                        <div className="flex items-center gap-6">
-                    
-                            <div className="text-[11px] text-slate-800 font-bold uppercase tracking-widest">
-                                Showing <span className="text-slate-800">{paginatedLeads.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to <span className="text-slate-900">{Math.min(currentPage * itemsPerPage, filteredLeads.length)}</span> of <span className="text-slate-900">{filteredLeads.length}</span> Results
-                            </div>
-                        </div>
+                        
 
                         {/* Right: Smart Navigation */}
                         <div className="flex items-center gap-2">
