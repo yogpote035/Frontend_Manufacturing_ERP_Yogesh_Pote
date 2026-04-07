@@ -329,13 +329,13 @@ const LeadList: React.FC = () => {
                                         </td>
                                         <td className="px-4 py-4">
                                             <div className="flex justify-center gap-2">
-                                                <button onClick={() => navigate("/sales/leads/view-lead/" + lead.id)} className="outline-none p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all">
+                                                <button onClick={() => navigate("/sales/leads/view-lead/" + lead.id)} className="outline-none p-2 hover:bg-white text-slate-800 hover:text-[#005d52] rounded-xl transition-all">
                                                     <Eye size={16} />
                                                 </button>
-                                                <button onClick={() => navigate("/sales/leads/edit-lead/" + lead.id)} className="outline-none p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-blue-600 rounded-xl transition-all">
+                                                <button onClick={() => navigate("/sales/leads/edit-lead/" + lead.id)} className="outline-none p-2 hover:bg-white  text-slate-800 hover:text-blue-600 rounded-xl transition-all">
                                                     <FileEdit size={16} />
                                                 </button>
-                                                <button onClick={() => handleDelete(lead.id)} className="outline-none p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-rose-600 rounded-xl transition-all">
+                                                <button onClick={() => handleDelete(lead.id)} className="outline-none p-2 hover:bg-white text-slate-800 hover:text-rose-600 rounded-xl transition-all">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>

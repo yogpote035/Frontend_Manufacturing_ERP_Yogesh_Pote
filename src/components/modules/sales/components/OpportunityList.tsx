@@ -283,15 +283,15 @@ const OpportunityList: React.FC = () => {
                                             <span className={getPriorityStyle(op.priority)}>{op.priority}</span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2 text-[12px] font-bold text-slate-500">
+                                            <div className="flex items-center gap-2 text-[12px] text-slate-800">
                                                 {new Date(op.expected_close_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex justify-center gap-2">
-                                                <button onClick={() => navigate(`/sales/opportunities/opportunity-view/${op.id}`)} className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-[#005d52] rounded-xl transition-all"><Eye size={16} /></button>
-                                                <button onClick={() => navigate(`/sales/opportunities/opportunity-edit/${op.id}`)} className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-blue-600 rounded-xl transition-all"><FileEdit size={16} /></button>
-                                                <button className="p-2 hover:bg-white hover:shadow-md text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Trash2 size={16} /></button>
+                                                <button onClick={() => navigate(`/sales/opportunities/opportunity-view/${op.id}`)} className="p-2 hover:bg-white  text-slate-800 hover:text-[#005d52] rounded-xl transition-all"><Eye size={16} /></button>
+                                                <button onClick={() => navigate(`/sales/opportunities/opportunity-edit/${op.id}`)} className="p-2 hover:bg-white text-slate-800 hover:text-blue-600 rounded-xl transition-all"><FileEdit size={16} /></button>
+                                                <button className="p-2 hover:bg-white text-slate-800 hover:text-rose-600 rounded-xl transition-all"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
