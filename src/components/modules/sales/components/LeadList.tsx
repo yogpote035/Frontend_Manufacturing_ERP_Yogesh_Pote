@@ -216,7 +216,7 @@ const LeadList: React.FC = () => {
 
 
                     {isCalendarOpen && (
-                        <div ref={calendarRef} className="absolute top-full mt-3 left-0 md:left-auto md:right-90 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 min-w-[320px] animate-in slide-in-from-top-2">
+                        <div ref={calendarRef} className="absolute top-full mt-3 left-0 md:left-auto md:right-100 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 min-w-[320px] animate-in slide-in-from-top-2">
                             <div className="flex justify-between items-center mb-4">
                                 <h4 className="text-sm font-bold text-slate-800">Custom Date Range</h4>
                                 <button onClick={() => setIsCalendarOpen(false)} className="outline-none "><X size={18} className="outline-none text-slate-400 hover:text-red-500" /></button>

@@ -9,11 +9,11 @@ import {
     Eye,
     FileEdit,
     X,
-    
+
     Calendar as CalendarIcon,
     MoreHorizontal,
     TrendingUp,
-    
+
     IndianRupee
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -167,17 +167,10 @@ const OpportunityList: React.FC = () => {
                 {/* Header */}
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
-                            Sales Opportunities <TrendingUp className="text-[#005d52]" size={28} />
-                        </h1>
-                        <p className="text-slate-500 mt-1 font-medium">Track high-value deals and pipeline stages.</p>
+                        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Opportunities</h1>
+                        <p className="text-sm text-gray-500 mt-1 font-medium">Track high-value deals and pipeline stages.</p>
                     </div>
-                    <button
-                        onClick={() => navigate("/sales/opportunities/new")}
-                        className="group flex items-center gap-2 bg-[#005d52] hover:bg-[#004a41] text-white px-6 py-3.5 rounded-2xl font-bold text-sm shadow-xl shadow-teal-900/20 transition-all active:scale-95"
-                    >
-                        <Plus size={18} strokeWidth={3} /> New Opportunity
-                    </button>
+
                 </header>
 
                 {/* Time Tabs */}
@@ -192,16 +185,16 @@ const OpportunityList: React.FC = () => {
                                 {tab}
                             </button>
                         ))}
+                        <button
+                            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                            className={`px-5 py-3 text-xs font-bold rounded-2xl transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-[#005d52] text-white shadow-md" : "bg-white border-slate-200 text-slate-500"}`}
+                        >
+                            <CalendarIcon size={14} /> Custom
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                        className={`px-5 py-3 text-xs font-bold rounded-2xl border transition-all flex items-center gap-2 ${activeTab === "Custom" ? "bg-teal-50 border-teal-200 text-[#005d52]" : "bg-white border-slate-200 text-slate-500"}`}
-                    >
-                        <CalendarIcon size={14} /> Custom
-                    </button>
 
                     {isCalendarOpen && (
-                        <div ref={calendarRef} className="absolute top-full mt-3 left-0 z-50 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 min-w-[320px] animate-in fade-in zoom-in-95">
+                        <div ref={calendarRef} className="absolute top-full mt-3 left-40  z-50 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 min-w-[320px] animate-in fade-in zoom-in-95">
                             <div className="flex justify-between items-center mb-4">
                                 <h4 className="text-sm font-bold text-slate-800">Select Date Range</h4>
                                 <button onClick={() => setIsCalendarOpen(false)}><X size={18} className="text-slate-400" /></button>
@@ -234,7 +227,7 @@ const OpportunityList: React.FC = () => {
                         <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full">
                             {[
                                 { label: 'Stage', value: stageFilter, options: ["All", "Discovery", "Proposal", "Negotiation", "Closed Won", "Closed Lost"], setter: setStageFilter },
-                                { label: 'Priority', value: priorityFilter, options: ["All", "High", "Medium", "Low","Critical"], setter: setPriorityFilter }
+                                { label: 'Priority', value: priorityFilter, options: ["All", "High", "Medium", "Low", "Critical"], setter: setPriorityFilter }
                             ].map((f) => (
                                 <div key={f.label} className="relative min-w-37.5">
                                     <button

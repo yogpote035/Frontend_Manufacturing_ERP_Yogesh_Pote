@@ -70,6 +70,17 @@ export default SalesOpportunity.reducer;
 export const getOpportunities = () => async (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(getSalesOpportunityRequest());
     try {
+        Swal.fire({
+            title: "Loading Opportunities...",
+            text: "Please wait while we fetch the data.",
+            allowOutsideClick: false,
+            customClass: {
+                loader: 'lead-loader'
+            },
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
         const token = getState().auth.token || localStorage.getItem("token");
         console.log("Token Before get Employee Request", token);
         const { data } = await axios.get(
@@ -84,7 +95,10 @@ export const getOpportunities = () => async (dispatch: AppDispatch, getState: ()
         // SUCCESS
         dispatch(getSalesOpportunitiesSuccess(data));
         console.log("Opportunities data after getOpportunities:", data);
+        Swal.close();
     } catch (error: any) {
+        Swal.close();
+
         const status = error.response?.status;
         const message =
             error.response?.data?.message || "Something went wrong";
