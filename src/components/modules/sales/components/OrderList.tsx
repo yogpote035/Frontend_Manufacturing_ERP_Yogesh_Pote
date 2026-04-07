@@ -254,11 +254,11 @@ const OrderList: React.FC = () => {
                                         <td className="p-5 text-center border-r border-slate-50">
                                             <input type="checkbox" className="accent-[#005d52] w-4 h-4 cursor-pointer" checked={selectedIds.includes(o.id)} onChange={() => setSelectedIds(prev => prev.includes(o.id) ? prev.filter(i => i !== o.id) : [...prev, o.id])} />
                                         </td>
-                                        <td className="px-4 py-5 text-[13px] font-bold text-[#005d52] border-r border-slate-50 text-center">{o.order_id}</td>
+                                        <td className="px-4 py-5 text-[13px] text-slate-800 border-r border-slate-50 text-center">{o.order_id}</td>
                                         <td className="px-4 py-5 text-[13px] text-slate-500 whitespace-nowrap border-r border-slate-50 font-medium">
                                             {new Date(o.order_date).toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'})}
                                         </td>
-                                        <td className="px-4 py-5 text-[13px] font-bold text-slate-700 border-r border-slate-50">{o.customer_name}</td>
+                                        <td className="px-4 py-5 text-[13px] text-slate-700 border-r border-slate-50">{o.customer_name}</td>
                                         <td className="px-4 py-5 text-[14px] font-black text-slate-800 border-r border-slate-50 text-center">
                                            <div className="flex items-center justify-center gap-1">
                                                 <IndianRupee size={12} className="text-slate-400"/>
